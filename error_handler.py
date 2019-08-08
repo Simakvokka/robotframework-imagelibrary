@@ -8,10 +8,9 @@ from robot.api import logger as LOGGER
 
 pyautogui.FAILSAFE = False
 
-from .singleton import Singleton
+from ImageLibrary.singleton import Singleton
 
-
-
+from PIL import Image
 
 
 
@@ -22,24 +21,24 @@ class ErrorHandler(object):
 
     HISTORY_SIZE = 50
 
-    def __init__(self, game_id, game_name, screenshot_folder, area, debug):
-        self.game_id = game_id
-        self.game_name = game_name.replace(" ", "_")
-        self.game_prefix = "{}_{}".format(game_id, self.game_name)
+    def __init__(self, screenshot_folder, area):
+
         self.screenshot_folder = screenshot_folder
         self.screenshot_counter = 1
         self.area = area
         self.clear_history()
-        self.debug = debug
         self.info_message_counter = 1
 
     def _save_to_disk(self, img, name):
-        try:
-            os.remove(os.path.join(self.screenshot_folder, name))
-        except OSError:
-            pass
+        if not os.path.exists(self.screenshot_folder):
+            os.makedirs(self.screenshot_folder)
+            try:
+                os.remove(os.path.join(self.screenshot_folder, name))
+            except OSError:
+                pass
+
         i = img.convert('RGB')
-        i.save(os.path.join(self.screenshot_folder, name), "JPEG", quality=10)
+        i.save(os.path.join(self.screenshot_folder, name), "JPEG", quality=50)
 
     def save_state(self, level="INFO"):
         '''Save screen and log everything about current game state to log
@@ -47,12 +46,12 @@ class ErrorHandler(object):
         Screenshots with level "WARN" and "ERROR" appears in screenshot_folder immedeately
         '''
 
-        screenshot_name = "{}-state-{}.png".format(self.game_prefix, self.screenshot_counter)
+        screenshot_name = "state-{}.png".format(self.screenshot_counter)
         self.screenshot_counter += 1
 
         screen_img = pyautogui.screenshot(region=self.area)
 
-        if level == "INFO" and not self.debug:
+        if level == "INFO":
             self.history.append((screen_img, screenshot_name))
         else:
             self._save_to_disk(screen_img, screenshot_name)
@@ -71,9 +70,9 @@ class ErrorHandler(object):
         #image is tuple(name, PIL image)
         msg = message
         for image in images:
-            image_filename = "{}-{}-{}.png".format(self.game_prefix, image[0], self.info_message_counter)
+            image_filename = "{}-{}.png".format(image[0], self.info_message_counter)
             self._save_to_disk(image[1], image_filename)
-            msg += '<br/>{}: <img src="{}"/>'.format(image[0], image_filename)
+            msg += '<br/>{}: <img src="{}"/>'.format(image[0], os.path.join(self.screenshot_folder, image_filename))
 
         self.info_message_counter += 1
         LOGGER.write(msg, level, html=True)

@@ -2,106 +2,38 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-import os.path
-
-from .image_processor import ImageProcessor
-from .zone import Zone
-from .compare_img import ImageComparison
-from ImageLibrary import error_handler
+from ImageLibrary.template import Template, ComplexTemplate
+from ImageLibrary.error_handler import ErrorHandler
+from ImageLibrary.zone import Zone
 from GUIProcess import GUIProcess
+
 
 __version__ = '0.1.0'
 ROBOT_LIBRARY_SCOPE = 'GLOBAL'
 
-
-#
-
-class ImageLibrary(ImageProcessor, ImageComparison, GUIProcess):
+class ImageLibrary(Template, ComplexTemplate, GUIProcess, Zone):
     """TODO: doc
     """
 
-    ####    INIT    ####
     def __init__(self, screenshot_folder=None):
-        super(ImageProcessor, self).__init__()
-        super(GUIProcess, self).__init__()
+
         self.screenshot_folder = screenshot_folder
-        #main game window
-        #self.mgw = None
+        self.window_area = GUIProcess().get_window_area()
 
-        self.rect = GUIProcess().get_window_area()
+        self.error_handler = ErrorHandler(self.screenshot_folder, self.window_area)
 
-    # def init(self, settings_file, reference_folders, area, log_type=None,
-    #          keyword_on_failure='SlotBot.Take A Screenshot'):
-    #     '''Init slotbot'''
-    #     self.debug = utils.to_bool(BuiltIn().get_variable_value("${DEBUG_MODE}", False))
-    #
-    #     self.settings = {}
-    #     self.button_registry = GlobalButtonRegistry('hack')
-    #
-    #     if hasattr(settings_file, '__iter__'):
-    #         for setting in settings_file:
-    #             #old and deprecated: #config = yaml.load(file(setting, "r"))
-    #             config = yaml.load(file(setting, "r"), Loader=yaml.FullLoader)
-    #             if "global_buttons_defs" in config:
-    #                 self.button_registry.update_info(config["global_buttons_defs"])
-    #                 del config["global_buttons_defs"]
-    #
-    #             self.settings.update(config)
-    #     else:
-    #         #old and deprecated: #config = yaml.load(file(settings_file, "r"))
-    #         config = yaml.load(file(settings_file, "r"), Loader=yaml.FullLoader)
-    #         if "global_buttons_defs" in config:
-    #             self.button_registry.update_info(config["global_buttons_defs"])
-    #             del config["global_buttons_defs"]
-    #         self.settings.update(config)
-    #
-    #     self.reference_folders = reference_folders
-    #     _check_config(self.settings, self.reference_folders)
-    #
-    #     self.area = area
-    #
-    #     if "main" not in self.settings:
-    #         raise errors.ConfigError('config must contain "main" section')
-    #
-    #     self.game_id = self.settings["game_id"] if "game_id" in self.settings else None
-    #     self.game_name = self.settings["game_name"] if "game_name" in self.settings else None
-    #
-    #     self.error_handler = ErrorHandler(self.game_id, self.game_name, self.screenshot_folder, self.area, self.debug)
-    #     self.image_processor = ImageProcessor(area, OpenCV(), reference_folders, self.error_handler)
-    #     self.button_registry.report_merge_errors()
-    #
-    #     self.button_constructor = ButtonConstructor()
-    #
-    #     #init all windows
-    #     self.windows = {}
-    #     for name, config in self.settings.iteritems():
-    #         if name == "main" and log_type is None:
-    #             llp = BuiltIn().run_keyword("Get Launcher Log Parser")
-    #             self.mgw = MainGameWindow(config, "main", self.button_constructor, self.debug, llp)
-    #
-    #         if name == "main" and log_type == "browser":
-    #             #llp = BuiltIn().run_keyword("Get Browser Log Parser")
-    #             llp = None
-    #             self.mgw = MainGameWindow(config, "main", self.button_constructor, self.debug, llp)
-    #
-    #         elif isinstance(config, dict):
-    #             self.windows[name] = GameWindow(config, name, self.button_constructor, self.debug)
-    #
-    #         #window has multiple screens
-    #         elif isinstance(config, list):
-    #             self.windows[name] = []
-    #             for index, screen in enumerate(config):
-    #                 if not isinstance(screen, dict):
-    #                     raise errors.ConfigError("screen {} of window {} not properly configured: dict expected".format(index + 1, name))
-    #
-    #                 self.windows[name].append(GameWindow(screen, name, self.button_constructor, self.debug))
+        Template.__init__(self, self.error_handler, self.window_area)
+        ComplexTemplate.__init__(self, self.error_handler, self.window_area)
+        Zone.__init__(self, self.window_area)
+        GUIProcess.__init__(self)
+
+
+
+
 
     ####    ERROR HANDLING      ####
     def save_state(self):
         self.error_handler.save_state()
-
-    # def show_build_quality(self):
-    #     self.error_handler.show_build_quality()
 
     def clear_screenshots_history(self):
         self.error_handler.clear_history()
@@ -180,12 +112,4 @@ class ImageLibrary(ImageProcessor, ImageComparison, GUIProcess):
 
     # def hide_cursor(self):
     #     return ImageProcessor().hide_cursor()
-
-    def compare_images(self, id, image, screen):
-
-        dir = os.path.abspath(os.path.dirname(__file__))
-        imdir = os.path.abspath(os.path.join(os.sep, dir, '..\\..\\launcher\\l_screens\\haxe\\haxe_mobile'))
-        image = imdir + '\\' + id + '\\' + image
-        print(image)
-        return ImageComparison().return_comparison_result(image, screen)
 

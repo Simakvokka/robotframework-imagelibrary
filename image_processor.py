@@ -3,18 +3,19 @@ import datetime
 import math
 import os
 import pyautogui
-import cv2 as cv
 
 from PIL import Image, ImageChops, ImageOps
 
 from robot.api import logger as LOGGER
 
-from .singleton import Singleton
-from .error_handler import ErrorHandler
-from .screenshot_operations import ScreenshotOperations
+from ImageLibrary.singleton import Singleton
+from ImageLibrary.screenshot_operations import ScreenshotOperations
+from ImageLibrary.open_cv import OpenCV
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 from ImageLibrary import utils
 from ImageLibrary import errors
+from ImageLibrary.error_handler import ErrorHandler
+
 
 pyautogui.FAILSAFE = False
 pyautogui.PAUSE = 0.05
@@ -46,12 +47,6 @@ def get_image_from_config(config):
     raise AssertionError("Config is malformed: {} is not a valid entry for image".format(config))
 
 
-def _get_threshold(info, threshold):
-    if threshold is not None:
-        return threshold
-    else:
-        return info[1]
-
 
 class FindResult:
     def __init__(self, x, y, width, height, threshold, image, screen, found):
@@ -71,14 +66,13 @@ class FindResult:
 class ImageProcessor(object):
     '''Image processing system - open files if needed, find them on screen, etc'''
 
-    #__metaclass__ = Singleton
+    __metaclass__ = Singleton
 
-    def __init__(self, rect, cv, reference_folders, error_handler):
-        self.rect = rect
-        self.cv = cv
-        self.error_handler = error_handler
-        self.reference_folders = reference_folders
+    def __init__(self, area, error_handler):
+        self.rect = area
+        self.cv = OpenCV()
         self.cache_screenshot = None
+        self.error_handler = error_handler
 
     def get_window_rect(self):
         return self.rect
@@ -88,41 +82,35 @@ class ImageProcessor(object):
         if pyautogui.position() != where_to_move:
             pyautogui.moveTo(*where_to_move)
 
-    def _get_screenshot(self, area=None):
+    def _get_screenshot(self, zone=None, win_area=None):
         '''S._get_screenshot([area]) -> Image
             Get screenshot of specified area or whole game window if rect is None
             Coordinates are calculating from left-top corner of window
         '''
         #assert self.rect is not None, "Init window area before use"
 
-        self.hide_cursor()
-        if area is not None:
-            im = pyautogui.screenshot(region=(self.rect[0] + area[0], self.rect[1] + area[1], area[2], area[3]))
+        #self.hide_cursor()
+        if zone is not None:
+            print(win_area)
+            im = pyautogui.screenshot(region=(win_area[0] + int(zone[0]), win_area[1] + int(zone[1]), int(zone[2]), int(zone[3])))
         else:
-            im = pyautogui.screenshot(region=self.rect)
+            im = pyautogui.screenshot(region=win_area)
         return im
 
     def get_screenshot(self):
         # for external use, without areas
-        self.hide_cursor()
+
         return pyautogui.screenshot(region=self.rect)
 
     def load_image(self, image):
-        '''Load image from reference folders'''
-        if isinstance(image, Image.Image):
-            return image
-
-        img = None
-        for folder in self.reference_folders:
-            try:
-                return Image.open(os.path.join(folder, image))
-            except IOError:
-                pass
-
-        self.error_handler.report_error("Not opened image {} in [{}]".format(image, ", ".join(self.reference_folders)))
+        try:
+            return Image.open(image)
+        except IOError:
+            pass
+        self.error_handler.report_error("Not opened image {}".format(image))
         raise errors.CanNotOpenImageException(image)
 
-    def _get_screen(self, cache=False, zone=None, screen=None):
+    def _get_screen(self, cache=False, zone=None, screen=None, area=None):
         '''S._get_screen(cache, zone, screen) -> PIL image
             cache - bool, use cached image or make new
             zone - tuple(x, y, w, h)
@@ -130,19 +118,21 @@ class ImageProcessor(object):
 
             Cache - user logic, screen - for internal use
         '''
-        area = zone
+        search_zone = zone
+        scr = screen
+        win_area = area
 
-        if screen is not None:
-            img = screen
+        if scr is not None:
+            img = scr
         elif cache:
             if self.cache_screenshot is None:
                 raise errors.CacheError
             img = self.cache_screenshot
         else:
-            return self._get_screenshot(area)
+            return self._get_screenshot(search_zone, win_area)
 
         if area is not None:
-            return img.crop((area[0], area[1], area[0] + area[2], area[1] + area[3]))
+            return img.crop((search_zone[0], search_zone[1], search_zone[0] + search_zone[2], search_zone[1] + search_zone[3]))
         else:
             return img
 
@@ -150,7 +140,7 @@ class ImageProcessor(object):
         self.cache_screenshot = self._get_screenshot()
 
     def find_image_result(self, img, screen_img, threshold):
-        result = self.cv.find_template(img, screen_img, threshold)
+        result = OpenCV().find_template(img, screen_img, threshold)
         if result is not None:
             return FindResult(*result, image=img, screen=screen_img, found=True)
         else:
@@ -168,14 +158,13 @@ class ImageProcessor(object):
         return self.find_image_result(img, screen_img, threshold)
 
     def is_image_on_screen(self, image, threshold=0.95, cache=False, zone=None, screen=None):
-        print('here')
         return self.find_image(image, threshold, cache, zone, screen).found
 
     def image_should_be_on_screen(self, image, threshold=0.95, cache=False, zone=None, screen=None):
         result = self.find_image(image, threshold, cache, zone, screen)
         if result.found:
             return True
-        ErrorHandler().report_warning("First try was unsuccesful")
+        self.error_handler.report_warning("First try was unsuccesful")
 
         # try again
         utils.sleep(0.020)
@@ -204,7 +193,7 @@ class ImageProcessor(object):
         image_info = ("image", result.image)
         screen_info = ("screen", result.screen)
         msg = "Image was found at screen with threshold {}".format(threshold)
-        self.error_handler.report_error(msg, image_info, screen_info)
+        ErrorHandler().report_error(msg, image_info, screen_info)
         raise RuntimeError(msg)
 
     def wait_for_image(self, image, threshold=0.95, timeout=15, zone=None):
@@ -297,7 +286,7 @@ class ImageProcessor(object):
         screen_img = self._get_screen(cache, zone, screen)
         img = self.load_image(image)
 
-        poses = self.cv.find_multiple_templates(img, screen_img, threshold)
+        poses = OpenCV().find_multiple_templates(img, screen_img, threshold)
 
         result = []
         for pos in poses:
@@ -373,12 +362,13 @@ class ImageProcessor(object):
 
         return origresize
 
-    def get_image_to_recognize(self, zone, cache, resize_percent, contrast, contour, invert, brightness, change_mode):
+    def get_image_to_recognize(self, zone, cache, resize_percent, contrast, contour, invert, brightness, change_mode, win_area):
 
-        im = self.check_to_resize(cache, zone, resize_percent)
+        im = self.check_to_resize(cache, zone, resize_percent, win_area)
+
         if change_mode:
             im = self.cv.prepare_image_to_recognize(im)
-        im.save('prepared.png')
+            im.save('prepared.png')
 
         if invert:
             im = self.cv.prepare_image_to_recognize(im)
@@ -402,7 +392,7 @@ class ImageProcessor(object):
             elif brightness > 0:
                 im = ScreenshotOperations().change_brightness(im, brightness)
                 im.save('brightness.png')
-
+        im.save('zone.png')
         return im
 
     def get_image_to_recognize_with_background(self, zone, cache, resize_percent, contrast, background, contour,
@@ -450,9 +440,9 @@ class ImageProcessor(object):
 
                 return result
 
-    def check_to_resize(self, cache, zone, resize_percent):
-
-        orig = self._get_screen(cache, zone)
+    def check_to_resize(self, cache, zone, resize_percent, win_area):
+        screen = None
+        orig = self._get_screen(cache, zone, screen, win_area)
         origFile = self._make_up_filename()
         orig.save(origFile)
 
@@ -499,7 +489,7 @@ class ImageProcessor(object):
             if (datetime.datetime.now() - start_time).seconds > timeout:
                 break
 
-        ErrorHandler().report_warning("Timeout exceeded while waiting for animation stops")
+        self.error_handler.report_warning("Timeout exceeded while waiting for animation stops")
         return False
 
     def wait_for_animation_starts(self, zone, timeout, threshold, step):
@@ -521,7 +511,7 @@ class ImageProcessor(object):
             if (datetime.datetime.now() - start_time).seconds > timeout:
                 break
 
-        ErrorHandler().report_warning("Timeout exceeded while waiting for animation starts")
+        self.error_handler.report_warning("Timeout exceeded while waiting for animation starts")
         return False
 
     def is_animating(self, zone, threshold, step):

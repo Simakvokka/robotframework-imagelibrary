@@ -14,41 +14,45 @@ from robot.api import logger as LOGGER
 
 
 class Zone(object):
-    def __init__(self, name, config):
-        self.name = name
-        self.area = None
-        if (isinstance(config, dict)):
-            self.position = tuple(config["position"])
-            self.count = config["count"]
-            #todo: padding and direction
-            #by default padding = 0 and directin is horizontal
-        elif isinstance(config, list) and len(config) == 4:
-            self.area = tuple(config)
-        else:
-            raise RuntimeError("Zone {} configured wrong, [x, y, w, h] expected".format(name))
+    def __init__(self, win_area=None):
+        if win_area is not None:
+            self.win_area = tuple(win_area)
+        # if (isinstance(config, dict)):
+        #     self.position = tuple(config["position"])
+        #     self.count = config["count"]
+        #     #todo: padding and direction
+        #     #by default padding = 0 and directin is horizontal
+        # elif isinstance(config, list) and len(config) == 4:
+        #     self.area = tuple(config)
+        # else:
+        #     raise RuntimeError("Zone {} configured wrong, [x, y, w, h] expected".format(name))
 
-    @utils.add_error_info
-    def get_area(self, index=None):
-        if self.area is not None:
-            return self.area
-        else:
-            assert index is not None, "Zone with subzones must be accesed by index"
-            sz_height = self.position[3]
-            sz_width = self.position[2] / self.count
-
-            sz_left = self.position[0] + (int(index)-1)*sz_width
-            sz_top = self.position[1]
-            
-            return tuple([sz_left, sz_top, sz_width, sz_height])
+    # @utils.add_error_info
+    # def get_area(self):
+    #     if self.area is not None:
+    #         return self.area
+    #     else:
+    #         pass
+        # else:
+        #     assert index is not None, "Zone with subzones must be accesed by index"
+        #     sz_height = self.position[3]
+        #     sz_width = self.position[2] / self.count
+        #
+        #     sz_left = self.position[0] + (int(index)-1)*sz_width
+        #     sz_top = self.position[1]
+        #
+        #     return tuple([sz_left, sz_top, sz_width, sz_height])
         
         
     '''Returns integers'''
     @utils.add_error_info
-    def get_number_from_zone(self, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, background=None, contour=False, invert=False, brightness=0, change_mode=True):
+    def get_number_from_zone(self, zone=None, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, background=None, contour=False, invert=False, brightness=0, change_mode=True):
         if background is not None:
-            img = ImageProcessor().get_image_to_recognize_with_background(self.get_area(), cache, resize_percent, contrast, background, contour, brightness, invert)
+            img = ImageProcessor().get_image_to_recognize_with_background(zone, cache, resize_percent, contrast, background, contour, brightness, invert)
         else:
-            img = ImageProcessor().get_image_to_recognize(self.get_area(), cache, resize_percent, contrast, contour, invert, brightness, change_mode)
+            img = ImageProcessor().get_image_to_recognize(zone, cache, resize_percent, contrast, contour, invert, brightness, change_mode, self.win_area)
+
+        print(img)
 
         if resize > 0:
             resize = int(resize)
@@ -82,7 +86,7 @@ class Zone(object):
     '''Returns float numbers'''
     @utils.add_error_info
     def get_float_number_from_zone(self, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
-        img = ImageProcessor().get_image_to_recognize(self.get_area(), cache, resize_percent, contrast, contour, invert, brightness, change_mode)
+        img = ImageProcessor().get_image_to_recognize(self.area, cache, resize_percent, contrast, contour, invert, brightness, change_mode)
 
         if resize > 0:
             resize = int(resize)
@@ -115,9 +119,9 @@ class Zone(object):
     @utils.add_error_info
     def get_number_with_text_from_zone(self, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, background=None, contour=False, invert=False, brightness=0, change_mode=True):
         if background is not None:
-            img = ImageProcessor().get_image_to_recognize_with_background(self.get_area(), cache, resize_percent, contrast, background, contour, brightness, invert)
+            img = ImageProcessor().get_image_to_recognize_with_background(self.area, cache, resize_percent, contrast, background, contour, brightness, invert)
         else:
-            img = ImageProcessor().get_image_to_recognize(self.get_area(), cache, resize_percent, contrast, contour, invert, brightness, change_mode)
+            img = ImageProcessor().get_image_to_recognize(self.area, cache, resize_percent, contrast, contour, invert, brightness, change_mode)
             
         if resize > 0:
             resize = int(resize)
@@ -153,7 +157,7 @@ class Zone(object):
         
     def get_text_from_zone(self, lang=None, resize_percent=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
         
-        img = ImageProcessor().get_image_to_recognize(self.get_area(), cache, resize_percent, contrast, contour, invert, brightness, change_mode)
+        img = ImageProcessor().get_image_to_recognize(self.area, cache, resize_percent, contrast, contour, invert, brightness, change_mode)
         
         mydir = os.path.abspath(os.path.dirname(__file__))
         resdir = os.path.abspath(os.path.join(os.sep, mydir, r'..\..\resources'))
@@ -214,3 +218,34 @@ class Zone(object):
         screen = ImageProcessor()._get_screen(zone, cache)
 
         return MatchObjects().match_and_return_coordinates(template, screen, threshold)
+
+    # ###ANIMATIONS###
+    # def wait_for_animation_stops(self, zone=None, timeout=15, threshold=0.9, step=0.1):
+    #     '''Wait until animation stops in the given zone or in the whole active window if zone is not provided.
+    #         Pass _zone_, _timeout_, _step_, _thrreshold_ as arguments. All are optional.
+    #
+    #         Examples:
+    #         |   Wait For Animation Stops | zone=zone_coordinates | timeout=15 | threshold=0.95 | step=0.1
+    #     '''
+    #     zone = self.zones[zone].get_area() if zone is not None else None
+    #     return ImageProcessor().wait_for_animation_stops(zone, timeout, threshold, step)
+    #
+    #
+    # def wait_for_animation_starts(self, zone=None, timeout=15, threshold=0.9, step=0.1):
+    #     '''Same as `Wait For Animation Stops` but on the contrary.
+    #     '''
+    #     zone = self.zones[zone].get_area() if zone is not None else None
+    #     return ImageProcessor().wait_for_animation_starts(zone, timeout, threshold, step)
+    #
+    #
+    # def is_zone_animating(self, zone=None, threshold=0.9, step=0.1):
+    #     '''Checks if the given zone is animating. Returns boolean.
+    #         Pass _zone_, _threshold_, _step_ as arguments. All are optional. If zone is not provided
+    #             the while active area is taken.
+    #
+    #         Examples:
+    #         |   ${is_animating} = | Is Zone Animating | zone=game_zone | threshold=0.9 | step=0.1
+    #     '''
+    #     zone = self.zones[zone].get_area() if zone is not None else None
+    #     return ImageProcessor().is_animating(zone, threshold, step)
+
