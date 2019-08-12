@@ -68,19 +68,18 @@ class ImageProcessor(object):
 
     __metaclass__ = Singleton
 
-    def __init__(self, area, error_handler):
-        self.rect = area
+    def __init__(self, error_handler):
         self.cv = OpenCV()
         self.cache_screenshot = None
         self.error_handler = error_handler
 
-    def get_window_rect(self):
-        return self.rect
-
-    def hide_cursor(self):
-        where_to_move = (self.rect[0] + 1023, self.rect[1] + 767)
-        if pyautogui.position() != where_to_move:
-            pyautogui.moveTo(*where_to_move)
+    # def get_window_rect(self):
+    #     return self.rect
+    #
+    # def hide_cursor(self):
+    #     where_to_move = (self.rect[0] + 1023, self.rect[1] + 767)
+    #     if pyautogui.position() != where_to_move:
+    #         pyautogui.moveTo(*where_to_move)
 
     def _get_screenshot(self, zone=None, win_area=None):
         '''S._get_screenshot([area]) -> Image
@@ -90,8 +89,8 @@ class ImageProcessor(object):
         #assert self.rect is not None, "Init window area before use"
 
         #self.hide_cursor()
+        print('zone', zone)
         if zone is not None:
-            print(win_area)
             im = pyautogui.screenshot(region=(win_area[0] + int(zone[0]), win_area[1] + int(zone[1]), int(zone[2]), int(zone[3])))
         else:
             im = pyautogui.screenshot(region=win_area)
@@ -392,7 +391,7 @@ class ImageProcessor(object):
             elif brightness > 0:
                 im = ScreenshotOperations().change_brightness(im, brightness)
                 im.save('brightness.png')
-        im.save('zone.png')
+
         return im
 
     def get_image_to_recognize_with_background(self, zone, cache, resize_percent, contrast, background, contour,

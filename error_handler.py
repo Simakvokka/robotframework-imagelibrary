@@ -9,9 +9,7 @@ from robot.api import logger as LOGGER
 pyautogui.FAILSAFE = False
 
 from ImageLibrary.singleton import Singleton
-
-from PIL import Image
-
+from GUIProcess import GUIProcess
 
 
 class ErrorHandler(object):
@@ -21,11 +19,10 @@ class ErrorHandler(object):
 
     HISTORY_SIZE = 50
 
-    def __init__(self, screenshot_folder, area):
+    def __init__(self, screenshot_folder):
 
         self.screenshot_folder = screenshot_folder
         self.screenshot_counter = 1
-        self.area = area
         self.clear_history()
         self.info_message_counter = 1
 
@@ -49,7 +46,9 @@ class ErrorHandler(object):
         screenshot_name = "state-{}.png".format(self.screenshot_counter)
         self.screenshot_counter += 1
 
-        screen_img = pyautogui.screenshot(region=self.area)
+        self.window_area = GUIProcess().get_window_area()
+
+        screen_img = pyautogui.screenshot(region=self.window_area)
 
         if level == "INFO":
             self.history.append((screen_img, screenshot_name))

@@ -79,8 +79,8 @@ class GUIProcess(Process.Process):
         rc = _gui.get_window_client_rect(wnd)
         img = ag.screenshot(region=(rc[0] + int(x), rc[1] + int(y), int(w), int(h)))
 
-        imgFile = self._make_up_filename();
-        img.save(imgFile);
+        imgFile = self._make_up_filename()
+        img.save(imgFile)
 
         imgresize = Image.open(imgFile)
         width, height = imgresize.size

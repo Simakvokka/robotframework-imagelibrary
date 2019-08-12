@@ -18,16 +18,13 @@ class ImageLibrary(Template, ComplexTemplate, GUIProcess, Zone):
     def __init__(self, screenshot_folder=None):
 
         self.screenshot_folder = screenshot_folder
-        self.window_area = GUIProcess().get_window_area()
 
-        self.error_handler = ErrorHandler(self.screenshot_folder, self.window_area)
+        self.error_handler = ErrorHandler(self.screenshot_folder)
 
-        Template.__init__(self, self.error_handler, self.window_area)
-        ComplexTemplate.__init__(self, self.error_handler, self.window_area)
-        Zone.__init__(self, self.window_area)
+        Template.__init__(self, self.error_handler)
+        ComplexTemplate.__init__(self, self.error_handler)
+        Zone.__init__(self, self.screenshot_folder)
         GUIProcess.__init__(self)
-
-
 
 
 
