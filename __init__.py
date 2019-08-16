@@ -6,12 +6,13 @@ from ImageLibrary.template import Template, ComplexTemplate
 from ImageLibrary.error_handler import ErrorHandler
 from ImageLibrary.zone import Zone
 from GUIProcess import GUIProcess
+from ImageLibrary.image_processor import ImageProcessor
 
 
 __version__ = '0.1.0'
 ROBOT_LIBRARY_SCOPE = 'GLOBAL'
 
-class ImageLibrary(Template, ComplexTemplate, GUIProcess, Zone):
+class ImageLibrary(Template, ComplexTemplate, GUIProcess, Zone, ImageProcessor):
     """TODO: doc
     """
 
@@ -21,10 +22,12 @@ class ImageLibrary(Template, ComplexTemplate, GUIProcess, Zone):
 
         self.error_handler = ErrorHandler(self.screenshot_folder)
 
+
         Template.__init__(self, self.error_handler)
         ComplexTemplate.__init__(self, self.error_handler)
         Zone.__init__(self, self.screenshot_folder)
         GUIProcess.__init__(self)
+        ImageProcessor.__init__(self, self.error_handler)
 
 
 

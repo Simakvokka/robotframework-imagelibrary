@@ -1,12 +1,17 @@
 from __future__ import absolute_import
-
+import os
+import re
+from PIL import Image
 from pytesseract import image_to_string
 from .image_processor import ImageProcessor
 from .error_handler import ErrorHandler
-from PIL import Image
-import os
+from .open_cv import MatchObjects
 from ImageLibrary import utils
+from .screenshot_operations import ScreenshotOperations
 from GUIProcess import GUIProcess
+from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
+from robot.api import logger as LOGGER
+
 
 
 class Zone(object):
@@ -15,13 +20,13 @@ class Zone(object):
         
     '''Returns integers'''
     @utils.add_error_info
-    def get_number_from_zone(self, zone=None, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, background=None, contour=False, invert=False, brightness=0, change_mode=True):
+    def get_number_from_zone(self, zone=None, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, background=None, invert=False, brightness=0, change_mode=True):
         self.window_area = GUIProcess().get_window_area()
 
         if background is not None:
-            img = ImageProcessor().get_image_to_recognize_with_background(zone, cache, resize_percent, contrast, background, contour, brightness, invert)
+            img = ImageProcessor().get_image_to_recognize_with_background(zone, cache, resize_percent, contrast, background, brightness, invert)
         else:
-            img = ImageProcessor().get_image_to_recognize(zone, cache, resize_percent, contrast, contour, invert, brightness, change_mode, self.window_area)
+            img = ImageProcessor().get_image_to_recognize(zone, cache, resize_percent, contrast, invert, brightness, change_mode, self.window_area)
 
         if resize > 0:
             resize = int(resize)
@@ -54,10 +59,10 @@ class Zone(object):
 
     '''Returns float numbers'''
     @utils.add_error_info
-    def get_float_number_from_zone(self, zone=None, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
+    def get_float_number_from_zone(self, zone=None, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, invert=False, brightness=0, change_mode=True):
         self.window_area = GUIProcess().get_window_area()
 
-        img = ImageProcessor().get_image_to_recognize(zone, cache, resize_percent, contrast, contour, invert, brightness, change_mode, self.window_area)
+        img = ImageProcessor().get_image_to_recognize(zone, cache, resize_percent, contrast, invert, brightness, change_mode, self.window_area)
 
         if resize > 0:
             resize = int(resize)
@@ -88,13 +93,13 @@ class Zone(object):
             raise
 
     @utils.add_error_info
-    def get_number_with_text_from_zone(self, zone=None, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, background=None, contour=False, invert=False, brightness=0, change_mode=True):
+    def get_number_with_text_from_zone(self, zone=None, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, background=None, invert=False, brightness=0, change_mode=True):
         self.window_area = GUIProcess().get_window_area()
 
         if background is not None:
-            img = ImageProcessor().get_image_to_recognize_with_background(zone, cache, resize_percent, contrast, contour, invert, brightness, change_mode)
+            img = ImageProcessor().get_image_to_recognize_with_background(zone, cache, resize_percent, contrast, invert, brightness, change_mode)
         else:
-            img = ImageProcessor().get_image_to_recognize(zone, cache, resize_percent, contrast, contour, invert, brightness, change_mode, self.window_area)
+            img = ImageProcessor().get_image_to_recognize(zone, cache, resize_percent, contrast, invert, brightness, change_mode, self.window_area)
 
         if resize > 0:
             resize = int(resize)
@@ -128,10 +133,10 @@ class Zone(object):
             ErrorHandler(self.screenshot_folder).report_error(msg, ("img", img))
             raise
 
-    def get_text_from_zone(self, zone=None, lang=None, resize_percent=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
+    def get_text_from_zone(self, zone=None, lang=None, resize_percent=0, contrast=0, cache=False, invert=False, brightness=0, change_mode=True):
         self.window_area = GUIProcess().get_window_area()
 
-        img = ImageProcessor().get_image_to_recognize(zone, cache, resize_percent, contrast, contour, invert, brightness, change_mode, self.window_area)
+        img = ImageProcessor().get_image_to_recognize(zone, cache, resize_percent, contrast, invert, brightness, change_mode, self.window_area)
 
         mydir = os.path.abspath(os.path.dirname(__file__))
         resdir = os.path.abspath(os.path.join(os.sep, mydir, r'..\..\resources'))
@@ -150,9 +155,10 @@ class Zone(object):
             ErrorHandler(self.screenshot_folder).report_error(msg, ("img", img))
             raise
 
+
     def get_image_from_zone(self, zone):
-        screen = self.get_area(zone)
-        scr = ImageProcessor()._get_screenshot(screen)
+        window_area = GUIProcess().get_window_area()
+        scr = ImageProcessor()._get_screenshot(zone, window_area)
 
         try:
             output = BuiltIn().get_variable_value('${OUTPUT_DIR}')
@@ -164,27 +170,27 @@ class Zone(object):
 
         return output + '\\scr.png'
 
-    def is_template_in_zone(self, template, zone, invert=False):
-        """Pass template(s) as images to be found on screen in the given zone.
-        Takes a screenshot of the passed area and find given data on the screenshot.
-        Returns results for each argument."""
+    # def is_template_in_zone(self, template, invert=False):
+    #     """Pass template(s) as images to be found on screen in the given zone.
+    #     Takes a screenshot of the passed area and find given data on the screenshot.
+    #     Returns results for each argument."""
+    #
+    #     window_area = GUIProcess().get_window_area()
+    #     screen = ImageProcessor()._get_screenshot(window_area)
+    #
+    #     if invert:
+    #         screen = ScreenshotOperations().invert_image(screen)
 
-        area = self.get_area(zone)
-        screen = ImageProcessor()._get_screenshot(area)
+    #    return MatchObjects().match_objects_with_knn(screen, template)
 
-        if invert:
-            screen = ScreenshotOperations().invert_image(screen)
-
-        return MatchObjects().match_objects_with_knn(screen, template)
-
-    def match_template_in_zone(self, template, zone, invert=False):
-        area = self.get_area(zone)
-        screen = ImageProcessor()._get_screenshot(area)
-
-        if invert:
-            screen = ScreenshotOperations().invert_image(screen)
-
-        return MatchObjects().match_objects(template, screen)
+    # def match_template_in_zone(self, template, zone, invert=False):
+    #     window_area = GUIProcess().get_window_area()
+    #     screen = ImageProcessor()._get_screenshot(zone, window_area)
+    #
+    #     if invert:
+    #         screen = ScreenshotOperations().invert_image(screen)
+    #
+    #     return MatchObjects().match_objects(template, screen)
 
     def get_template_position(self, template, zone, threshold=None):
         """The same as is_template_in_zone, but returns templates positions after search"""
@@ -192,34 +198,4 @@ class Zone(object):
         screen = ImageProcessor()._get_screen(zone, cache)
 
         return MatchObjects().match_and_return_coordinates(template, screen, threshold)
-
-    # ###ANIMATIONS###
-    # def wait_for_animation_stops(self, zone=None, timeout=15, threshold=0.9, step=0.1):
-    #     '''Wait until animation stops in the given zone or in the whole active window if zone is not provided.
-    #         Pass _zone_, _timeout_, _step_, _thrreshold_ as arguments. All are optional.
-    #
-    #         Examples:
-    #         |   Wait For Animation Stops | zone=zone_coordinates | timeout=15 | threshold=0.95 | step=0.1
-    #     '''
-    #     zone = self.zones[zone].get_area() if zone is not None else None
-    #     return ImageProcessor().wait_for_animation_stops(zone, timeout, threshold, step)
-    #
-    #
-    # def wait_for_animation_starts(self, zone=None, timeout=15, threshold=0.9, step=0.1):
-    #     '''Same as `Wait For Animation Stops` but on the contrary.
-    #     '''
-    #     zone = self.zones[zone].get_area() if zone is not None else None
-    #     return ImageProcessor().wait_for_animation_starts(zone, timeout, threshold, step)
-    #
-    #
-    # def is_zone_animating(self, zone=None, threshold=0.9, step=0.1):
-    #     '''Checks if the given zone is animating. Returns boolean.
-    #         Pass _zone_, _threshold_, _step_ as arguments. All are optional. If zone is not provided
-    #             the while active area is taken.
-    #
-    #         Examples:
-    #         |   ${is_animating} = | Is Zone Animating | zone=game_zone | threshold=0.9 | step=0.1
-    #     '''
-    #     zone = self.zones[zone].get_area() if zone is not None else None
-    #     return ImageProcessor().is_animating(zone, threshold, step)
 

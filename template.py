@@ -3,7 +3,8 @@ from __future__ import absolute_import
 
 from ImageLibrary.image_processor import ImageProcessor
 from ImageLibrary import utils
-from GUIProcess import GUIProcess
+
+#        self.area = GUIProcess().get_window_area()
 
 class Template(object):
 
@@ -12,42 +13,34 @@ class Template(object):
 
     @utils.add_error_info
     def find_template(self, image, threshold=0.95, cache=False, zone=None):
-        self.area = GUIProcess().get_window_area()
         return ImageProcessor(self.error_handler).find_image(image, threshold, cache, zone)
 
     @utils.add_error_info
     def is_template_on_screen(self, image, threshold=0.95, cache=False, zone=None):
-        self.area = GUIProcess().get_window_area()
         return ImageProcessor(self.error_handler).is_image_on_screen(image, threshold, cache, zone)
 
     @utils.add_error_info
     def template_should_be_on_screen(self, image, threshold=0.95, cache=False, zone=None):
-        self.area = GUIProcess().get_window_area()
         return ImageProcessor(self.error_handler).image_should_be_on_screen(image, threshold, cache, zone)
 
     @utils.add_error_info
     def template_should_not_be_on_screen(self, image, threshold=0.95, cache=False, zone=None):
-        self.area = GUIProcess().get_window_area()
         return ImageProcessor(self.error_handler).image_should_not_be_on_screen(image, threshold, cache, zone)
 
     @utils.add_error_info
     def wait_for_template(self, image, threshold=0.95, timeout=15, zone=None):
-        self.area = GUIProcess().get_window_area()
         return ImageProcessor(self.error_handler).wait_for_image(image, threshold, timeout, zone)
 
     @utils.add_error_info
     def wait_for_template_to_hide(self, image, threshold=0.95, timeout=15, zone=None):
-        self.area = GUIProcess().get_window_area()
         return ImageProcessor(self.error_handler).wait_for_image_to_hide(image, threshold, timeout, zone)
 
     @utils.add_error_info
     def wait_for_template_to_stop(self, image, threshold=0.95, timeout=15, move_threshold=0.99, step=0.1):
-        self.area = GUIProcess().get_window_area()
         return ImageProcessor(self.error_handler).wait_for_image_to_stop(image, threshold, timeout, move_threshold, step)
 
     @utils.add_error_info
     def get_templates_count(self, image, threshold=0.95, cache=False, zone=None):
-        self.area = GUIProcess().get_window_area()
         return ImageProcessor(self.error_handler).get_images_count(image, threshold, cache, zone)
 
 
@@ -57,7 +50,7 @@ class ComplexTemplate(object):
 
     @utils.add_error_info
     def is_complex_template_on_screen(self, images_set, threshold=0.95, cache=False, zone=None):
-        self.window_area = GUIProcess().get_window_area()
+        #self.window_area = GUIProcess().get_window_area()
         on_screen = True
         screen = ImageProcessor(self.error_handler).get_screenshot() if not cache else None
         for image in images_set:
@@ -69,7 +62,7 @@ class ComplexTemplate(object):
 
     @utils.add_error_info
     def is_any_part_of_complex_template_on_screen(self, images_set, threshold=0.95, cache=False, zone=None):
-        self.window_area = GUIProcess().get_window_area()
+        #self.window_area = GUIProcess().get_window_area()
         screen = ImageProcessor(self.error_handler).get_screenshot() if not cache else None
         for image in images_set:
             if ImageProcessor(self.error_handler).is_image_on_screen(image, threshold, cache, zone, screen):

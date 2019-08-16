@@ -3,10 +3,7 @@ from PIL import ImageOps, ImageEnhance
 class ScreenshotOperations(object):
     def __init__(self):
         pass
-    
-    def change_contour(self, image):
-        result = ImageOps.grayscale(image)
-        return result
+
         
     def change_contrast(self, image, contrast):
         enhancer = ImageEnhance.Contrast(image)

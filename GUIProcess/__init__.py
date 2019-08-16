@@ -74,63 +74,63 @@ class GUIProcess(Process.Process):
 
         _gui.set_active_window(proc.wnd)
 
-    def _get_screenshot(self, x, y, w, h, resize_percent=0):
-        wnd = _gui.get_active_window()
-        rc = _gui.get_window_client_rect(wnd)
-        img = ag.screenshot(region=(rc[0] + int(x), rc[1] + int(y), int(w), int(h)))
-
-        imgFile = self._make_up_filename()
-        img.save(imgFile)
-
-        imgresize = Image.open(imgFile)
-        width, height = imgresize.size
-        width_resize = width * int(resize_percent) / width + width
-        height_resize = height * int(resize_percent) / height + height
-        imgresize = imgresize.resize((int(round(width_resize)), int(round(height_resize))), Image.ANTIALIAS)
-        imgresize.save(imgFile);
-
-        LOGGER.info('Screenshot taken: {0}<br/><img src="{0}" '
-                    'width="100%" />'.format(imgFile), html=True)
-        return imgresize
-
-    def get_text_from_region(self, top, left, width, height):
-        img = self._get_screenshot(top, left, width, height)
-
-        txt = image_to_string(img, config="-psm 6")
-        LOGGER.trace("Get text from region (%s, %s, %s, %s) = '%s'" %
-                     (top, left, width, height, txt))
-        return txt
-    
-
-    def get_number_with_text_from_region(self, top, left, width, height, resize_percent=0):
-        img = self._get_screenshot(top, left, width, height, resize_percent)
-    
-        txt = image_to_string(img, config="-psm 6")
-    
-        num = re.compile('[0-9]')
-        num = num.findall(txt)
-        num = ''.join(num)
-    
-        LOGGER.trace("Get text from region (%s, %s, %s, %s) = '%s'" %
-                     (top, left, width, height, txt))
-        return num
-
-
-    def get_number_from_region(self, top, left, width, height, lang=None, resize_percent=0):
-        img = self._get_screenshot(top, left, width, height, resize_percent)
-
-        mydir = os.path.abspath(os.path.dirname(__file__))
-        resdir = os.path.abspath(os.path.join(os.sep, mydir, r"..\..\resources"))
-
-        config = ""
-        if lang:
-            config += ("--tessdata-dir %s -l %s " % (resdir, lang)).replace("\\", "//")
-        config += "-psm 8 -c tessedit_char_whitelist=0123456789"
-
-        txt = image_to_string(img, config=config)
-        LOGGER.trace("Get number from region (%s, %s, %s, %s) = '%s'" %
-                     (top, left, width, height, txt))
-        return txt
+    # def _get_screenshot(self, x, y, w, h, resize_percent=0):
+    #     wnd = _gui.get_active_window()
+    #     rc = _gui.get_window_client_rect(wnd)
+    #     img = ag.screenshot(region=(rc[0] + int(x), rc[1] + int(y), int(w), int(h)))
+    #
+    #     imgFile = self._make_up_filename()
+    #     img.save(imgFile)
+    #
+    #     imgresize = Image.open(imgFile)
+    #     width, height = imgresize.size
+    #     width_resize = width * int(resize_percent) / width + width
+    #     height_resize = height * int(resize_percent) / height + height
+    #     imgresize = imgresize.resize((int(round(width_resize)), int(round(height_resize))), Image.ANTIALIAS)
+    #     imgresize.save(imgFile);
+    #
+    #     LOGGER.info('Screenshot taken: {0}<br/><img src="{0}" '
+    #                 'width="100%" />'.format(imgFile), html=True)
+    #     return imgresize
+    #
+    # def get_text_from_region(self, top, left, width, height):
+    #     img = self._get_screenshot(top, left, width, height)
+    #
+    #     txt = image_to_string(img, config="-psm 6")
+    #     LOGGER.trace("Get text from region (%s, %s, %s, %s) = '%s'" %
+    #                  (top, left, width, height, txt))
+    #     return txt
+    #
+    #
+    # def get_number_with_text_from_region(self, top, left, width, height, resize_percent=0):
+    #     img = self._get_screenshot(top, left, width, height, resize_percent)
+    #
+    #     txt = image_to_string(img, config="-psm 6")
+    #
+    #     num = re.compile('[0-9]')
+    #     num = num.findall(txt)
+    #     num = ''.join(num)
+    #
+    #     LOGGER.trace("Get text from region (%s, %s, %s, %s) = '%s'" %
+    #                  (top, left, width, height, txt))
+    #     return num
+    #
+    #
+    # def get_number_from_region(self, top, left, width, height, lang=None, resize_percent=0):
+    #     img = self._get_screenshot(top, left, width, height, resize_percent)
+    #
+    #     mydir = os.path.abspath(os.path.dirname(__file__))
+    #     resdir = os.path.abspath(os.path.join(os.sep, mydir, r"..\..\resources"))
+    #
+    #     config = ""
+    #     if lang:
+    #         config += ("--tessdata-dir %s -l %s " % (resdir, lang)).replace("\\", "//")
+    #     config += "-psm 8 -c tessedit_char_whitelist=0123456789"
+    #
+    #     txt = image_to_string(img, config=config)
+    #     LOGGER.trace("Get number from region (%s, %s, %s, %s) = '%s'" %
+    #                  (top, left, width, height, txt))
+    #     return txt
 
     def get_window_area(self):
         wnd = _gui.get_active_window()
