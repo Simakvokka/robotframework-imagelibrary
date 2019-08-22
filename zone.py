@@ -15,8 +15,9 @@ from robot.api import logger as LOGGER
 
 
 class Zone(object):
-    def __init__(self, screenshot_folder):
+    def __init__(self, screenshot_folder, error_handler):
         self.screenshot_folder = screenshot_folder
+        self.error_handler = error_handler
         
     '''Returns integers'''
     @utils.add_error_info
@@ -157,8 +158,7 @@ class Zone(object):
 
 
     def get_image_from_zone(self, zone):
-        window_area = GUIProcess().get_window_area()
-        scr = ImageProcessor()._get_screenshot(zone, window_area)
+        scr = ImageProcessor()._screenshot(zone)
 
         try:
             output = BuiltIn().get_variable_value('${OUTPUT_DIR}')
@@ -192,10 +192,9 @@ class Zone(object):
     #
     #     return MatchObjects().match_objects(template, screen)
 
-    def get_template_position(self, template, zone, threshold=None):
+    def get_template_position(self, template, threshold=None):
         """The same as is_template_in_zone, but returns templates positions after search"""
-        cache = ImageProcessor().take_cache_screenshot()
-        screen = ImageProcessor()._get_screen(zone, cache)
+        screen = ImageProcessor(self.error_handler)._screenshot()
 
         return MatchObjects().match_and_return_coordinates(template, screen, threshold)
 

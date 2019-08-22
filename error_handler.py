@@ -38,22 +38,20 @@ class ErrorHandler(object):
         i.save(os.path.join(self.screenshot_folder, name), "JPEG", quality=50)
 
     def save_state(self, level="INFO"):
-        '''Save screen and log everything about current game state to log
-        Screenshots made with level "INFO" will not be saved in screenshot_folder until dump_screenshots is not called
-        Screenshots with level "WARN" and "ERROR" appears in screenshot_folder immedeately
-        '''
 
         screenshot_name = "state-{}.png".format(self.screenshot_counter)
         self.screenshot_counter += 1
+        self.area = GUIProcess().get_window_area()
 
-        self.window_area = GUIProcess().get_window_area()
+        screen_img = pyautogui.screenshot(region=self.area)
 
-        screen_img = pyautogui.screenshot(region=self.window_area)
 
-        if level == "INFO":
-            self.history.append((screen_img, screenshot_name))
-        else:
-            self._save_to_disk(screen_img, screenshot_name)
+
+        self._save_to_disk(screen_img, screenshot_name)
+
+        msg = 'Saved screenshot <br/><img src="{}"/>'.format(os.path.join(self.screenshot_folder, screenshot_name))
+        LOGGER.write(msg, level, html=True)
+
 
     def clear_history(self):
         self.history = deque(maxlen=ErrorHandler.HISTORY_SIZE)
