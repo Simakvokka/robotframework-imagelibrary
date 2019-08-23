@@ -25,6 +25,29 @@ DEFAULT_THRESHOLD = 0.95
 DEFAULT_TIMEOUT = 15
 
 
+def get_image_from_config(config):
+    '''get_image_from_config(config) -> tuple(PIL image, threshold)
+        In almost every place, where you can define image in config, you can write:
+        place:
+            image.png
+        place:
+            image: image.png
+        place:
+            image: image.png
+            threshold: 0.99
+        If threshold is not defined, DEFAULT_THRESHOLD will be used
+    '''
+    if isinstance(config, basestring):
+        return (ImageProcessor().load_image(config), DEFAULT_THRESHOLD)
+    elif isinstance(config, dict):
+        assert "image" in config, "image must be defined"
+        threshold = float(config["threshold"]) if "threshold" in config else DEFAULT_THRESHOLD
+        assert threshold > 0 and threshold <= 1, "Threshold must be in (0, 1]"
+        return (ImageProcessor().load_image(config["image"]), threshold)
+
+    raise AssertionError("Config is malformed: {} is not a valid entry for image".format(config))
+
+
 class FindResult(object):
     def __init__(self, x, y, width, height, threshold, image, screen, found):
         self.x = x  # left

@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import time
+import re
 
 delta = 20
 
@@ -75,3 +76,31 @@ def add_error_info(func):
             raise RuntimeError(str(e) + "; {}.{} {}".format(self.__class__.__name__, func.__name__, self.name))
 
     return wrapped
+
+
+RE_ELEMENT = re.compile(r"^(?P<name>.+?)(\[(?P<index>\d+)\])?$")
+def split_to_name_and_index(name, index):
+    m = RE_ELEMENT.match(name)
+    assert bool(m), "Corrupted name: {}, name([index])? expected".format(name)
+    parsed_name = m.groupdict()["name"]
+    parsed_index = m.groupdict()["index"]
+    if parsed_index is None:
+        parsed_index = index
+
+    return (parsed_name, parsed_index)
+
+def get_element_by_name_and_index(elements, name, index=-1):
+    sp_name, sp_index = split_to_name_and_index(name, index)
+    name = sp_name
+    index = sp_index if sp_index is not None else index
+    index = int(index)
+
+    assert name in elements, "Element {} not found, possible: {}".format(name, ", ".join(elements.iterkeys()))
+    result = elements[name]
+    if isinstance(result, list):
+        assert index != -1, "{} must be reached by index, but it wasn't set!".format(name)
+        assert index > 0, "Index for {} must be more that zero".format(name)
+        assert index <= len(result), "{} has only {} elements, index {} passed!".format(name, len(result), index)
+        result = result[index-1]
+
+    return result
