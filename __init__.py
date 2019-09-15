@@ -9,9 +9,10 @@ import re
 from ImageLibrary.template import Template, ComplexTemplate
 from ImageLibrary.error_handler import ErrorHandler
 from ImageLibrary.zone import Zone
-from GUIProcess import GUIProcess
+from ImageLibrary.GUIProcess import GUIProcess
 from ImageLibrary.image_processor import ImageProcessor
 from ImageLibrary.button_constructor import ButtonConstructor
+from ImageLibrary.static_button import StaticButton
 from ImageLibrary import errors
 from ImageLibrary import utils
 from ImageLibrary.button_constructor import BUTTON_TYPES
@@ -20,6 +21,13 @@ from ImageLibrary.button_constructor import BUTTON_TYPES
 
 __version__ = '0.1.0'
 ROBOT_LIBRARY_SCOPE = 'GLOBAL'
+
+
+def game_window_function(func):
+    def wrapper(self, *args, **kwargs):
+        func_name = func.__name__
+    
+    return wrapper
 
 
 def _get_images_from(node):
@@ -69,12 +77,13 @@ def _check_config(config, reference_folders):
     return True
 
 
-class ImageLibrary(Template, ComplexTemplate, GUIProcess, Zone, ImageProcessor, ErrorHandler, ButtonConstructor):
-
+class ImageLibrary(Template, ComplexTemplate, GUIProcess, Zone, ImageProcessor, ErrorHandler, ButtonConstructor, StaticButton):
+    
     def __init__(self, screenshot_folder=None):
 
         self.screenshot_folder = screenshot_folder
         self.error_handler = ErrorHandler(self.screenshot_folder)
+        self.button_constructor = ButtonConstructor()
 
         #super(ImageLibrary, self).__init__()
 
@@ -102,8 +111,9 @@ class ImageLibrary(Template, ComplexTemplate, GUIProcess, Zone, ImageProcessor, 
 
         self.reference_folders = reference_folders
         _check_config(self.settings, self.reference_folders)
-
-        self.button_constructor = ButtonConstructor()
+        
+        self.init_buttons()
+        
 
     ####    INIT  BUTTONS   ####
     @utils.add_error_info

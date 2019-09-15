@@ -15,7 +15,7 @@ from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 from ImageLibrary import utils
 from ImageLibrary.errors import *
 from ImageLibrary.error_handler import ErrorHandler
-from GUIProcess import GUIProcess
+from ImageLibrary.GUIProcess import GUIProcess
 
 
 pyautogui.FAILSAFE = False

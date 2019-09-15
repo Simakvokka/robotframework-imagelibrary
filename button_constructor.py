@@ -35,7 +35,6 @@ class ButtonConstructor(object):
                 if isinstance(button_config, list):
                     buttons[button_name] = StaticButtonList(button_name, button_config)
                 else:
-                    print(buttons)
                     buttons[button_name] = StaticButton(button_name, button_config)
 
         elif type == DYNAMIC_BUTTON_LABEL:

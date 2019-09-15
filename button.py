@@ -41,6 +41,7 @@ def get_button_info(config):
         # or list of states
         # or threshold and list of states
         default_threshold = config[THRESHOLD_LABEL] if THRESHOLD_LABEL in config else DEFAULT_THRESHOLD
+    
         if IMAGE_LABEL in config:
             states[STATE_NORMAL] = (ImageProcessor().load_image(config[IMAGE_LABEL]), default_threshold)
         elif STATES_LABEL in config:
@@ -48,6 +49,7 @@ def get_button_info(config):
             for state_label in POSSIBLE_STATES:
                 if state_label in states_config:
                     states[state_label] = get_state_info(states_config[state_label], default_threshold)
+                    
         else:
             raise AssertionError("image or states must be defined")
     else:
@@ -86,7 +88,7 @@ class Button(object):
         self.name = name
         self.rect = GUIProcess().get_window_area()
 
-    def press_button(self, index, times):
+    def press_button(self, index=-1, times=1):
         raise AssertionError("Button::press_button called")
 
     def get_name(self):
@@ -100,6 +102,7 @@ class Button(object):
         pyautogui.click(self.rect[0] + x, self.rect[1] + y, clicks=int(times), interval=0.1)
 
     def click_center(self, area, times):
+        print(area, times)
         center = (area[0] + area[2]/2, area[1] + area[3]/2)
         self.click(center[0], center[1], times)
 
@@ -121,9 +124,10 @@ class StatedButton(Button):
     def __init__(self, name, config):
         super(StatedButton, self).__init__(name)
         self.states = self._get_states_info(config)
+        
 
     @utils.add_error_info
-    def press_button(self, index, times):
+    def press_button(self, index=-1, times=1):
         coords = self._get_coordinates()
         #TODO: if debug mode
         if STATE_DISABLED in self.states:
@@ -133,6 +137,7 @@ class StatedButton(Button):
             if found is not None and self.states[STATE_DISABLED][0] is found.image:
                 #ErrorHandler().report_warning(u"You are trying to press disabled button. But you are the boss, ok ¯\_(ツ)_/¯")
                 raise ErrorHandler().report_error(u"You are pressing the disabled button. Seriously??")
+        print coords, times
 
         self.click_center(coords, times)
 

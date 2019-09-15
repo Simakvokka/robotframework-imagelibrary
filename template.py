@@ -28,7 +28,7 @@ class Template(object):
     def template_should_not_be_on_screen(self, image, threshold=0.95, cache=False, zone=None):
         return ImageProcessor(self.error_handler, self.output_dir).image_should_not_be_on_screen(image, threshold, cache, zone)
 
-    @utils.add_error_info
+    #@utils.add_error_info
     def wait_for_template(self, image, threshold=0.95, timeout=15, zone=None):
         return ImageProcessor(self.error_handler, self.output_dir).wait_for_image(image, threshold, timeout, zone)
 

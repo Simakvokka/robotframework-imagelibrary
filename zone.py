@@ -8,7 +8,7 @@ from .error_handler import ErrorHandler
 from .open_cv import MatchObjects
 from ImageLibrary import utils
 from .screenshot_operations import ScreenshotOperations
-from GUIProcess import GUIProcess
+from ImageLibrary.GUIProcess import GUIProcess
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 from robot.api import logger as LOGGER
 

@@ -71,7 +71,7 @@ class GUIProcess(Process.Process):
 
         if not hasattr(proc, 'wnd') or not proc.wnd:
             raise RuntimeError("Program with handle '%s' have no window!" % handle)
-
+        print '2'
         _gui.set_active_window(proc.wnd)
 
 

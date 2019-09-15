@@ -9,7 +9,7 @@ from robot.api import logger as LOGGER
 pyautogui.FAILSAFE = False
 
 from ImageLibrary.singleton import Singleton
-from GUIProcess import GUIProcess
+from ImageLibrary.GUIProcess import GUIProcess
 
 
 class ErrorHandler(object):
@@ -27,6 +27,7 @@ class ErrorHandler(object):
         self.info_message_counter = 1
 
     def _save_to_disk(self, img, name):
+        print('errpr', name, img)
         if not os.path.exists(self.screenshot_folder):
             os.makedirs(self.screenshot_folder)
             try:
