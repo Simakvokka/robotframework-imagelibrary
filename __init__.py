@@ -23,13 +23,6 @@ __version__ = '0.1.0'
 ROBOT_LIBRARY_SCOPE = 'GLOBAL'
 
 
-def game_window_function(func):
-    def wrapper(self, *args, **kwargs):
-        func_name = func.__name__
-    
-    return wrapper
-
-
 def _get_images_from(node):
     '''_get_images_from(node) -> set(string)
         Gets all images from this node recursively
@@ -85,13 +78,14 @@ class ImageLibrary(Template, ComplexTemplate, GUIProcess, Zone, ImageProcessor, 
         self.error_handler = ErrorHandler(self.screenshot_folder)
         self.button_constructor = ButtonConstructor()
 
-        #super(ImageLibrary, self).__init__()
+        super(ImageLibrary, self).__init__(self, screenshot_folder)
 
         Template.__init__(self, self.error_handler, self.screenshot_folder)
         ComplexTemplate.__init__(self, self.error_handler)
         GUIProcess.__init__(self)
         Zone.__init__(self, self.screenshot_folder, self.error_handler)
         ImageProcessor.__init__(self, self.error_handler, self.screenshot_folder)
+
 
 
     def init(self, settings_file, reference_folders):
@@ -124,12 +118,11 @@ class ImageLibrary(Template, ComplexTemplate, GUIProcess, Zone, ImageProcessor, 
         # create all window elements
         for entry_type, entry_config in self.config.iteritems():
             if entry_type in BUTTON_TYPES:
+                return self.buttons.update(self.button_constructor.create_buttons(entry_type, entry_config))
 
-                self.buttons.update(self.button_constructor.create_buttons(entry_type, entry_config))
 
-
-    def save_state(self, level="INFO"):
-        self.error_handler.save_state()
+    # def save_state(self, level="INFO"):
+    #     self.error_handler.save_state()
 
     def clear_screenshots_history(self):
         self.error_handler.clear_history()

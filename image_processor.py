@@ -16,6 +16,7 @@ from ImageLibrary import utils
 from ImageLibrary.errors import *
 from ImageLibrary.error_handler import ErrorHandler
 from ImageLibrary.GUIProcess import GUIProcess
+from ImageLibrary.singleton import Singleton
 
 
 pyautogui.FAILSAFE = False
@@ -66,6 +67,8 @@ class FindResult(object):
 class ImageProcessor(object):
     '''Image processing system - open files if needed, find them on screen, etc'''
 
+    __metaclass__ = Singleton
+
     def __init__(self, error_handler, output_dir):
         self.cv = OpenCV()
         self.cache_screenshot = None
@@ -97,8 +100,8 @@ class ImageProcessor(object):
             return Image.open(image)
         except IOError:
             pass
-        self.error_handler.report_error("Not opened image {}".format(image))
-        raise CanNotOpenImageException(image)
+        #self.error_handler.report_error("Not opened image {}".format(image))
+        #raise CanNotOpenImageException(image)
 
     def _get_screen(self, cache=None, zone=None, screen=None):
         '''S._get_screen(cache, zone, screen) -> PIL image

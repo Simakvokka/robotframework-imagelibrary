@@ -44,8 +44,8 @@ class ErrorHandler(object):
         self.screenshot_counter += 1
         self.area = GUIProcess().get_window_area()
 
-        screen_img = pyautogui.screenshot(region=self.area)
 
+        screen_img = pyautogui.screenshot(region=self.area)
 
 
         self._save_to_disk(screen_img, screenshot_name)

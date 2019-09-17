@@ -6,6 +6,7 @@ from ImageLibrary.error_handler import ErrorHandler
 from ImageLibrary.image_processor import ImageProcessor, DEFAULT_THRESHOLD
 from ImageLibrary import utils
 from ImageLibrary import GUIProcess
+from robot.api import logger as LOGGER
 
 STATE_NORMAL = "normal"
 STATE_HIGHLIGHTED = "highlighted"
@@ -42,18 +43,20 @@ def get_button_info(config):
         # or threshold and list of states
         default_threshold = config[THRESHOLD_LABEL] if THRESHOLD_LABEL in config else DEFAULT_THRESHOLD
     
-        if IMAGE_LABEL in config:
+        if IMAGE_LABEL in config.iteritems():
+            print 'im label'
             states[STATE_NORMAL] = (ImageProcessor().load_image(config[IMAGE_LABEL]), default_threshold)
-        elif STATES_LABEL in config:
+        elif STATES_LABEL in config.iteritems():
+            print 'states label'
             states_config = config[STATES_LABEL]
             for state_label in POSSIBLE_STATES:
                 if state_label in states_config:
                     states[state_label] = get_state_info(states_config[state_label], default_threshold)
                     
-        else:
-            raise AssertionError("image or states must be defined")
-    else:
-        raise AssertionError("Lists are not supported in button block")
+    #     else:
+    #         raise AssertionError("image or states must be defined")
+    # else:
+    #     raise AssertionError("Lists are not supported in button block")
 
     return states
 
@@ -79,6 +82,7 @@ def find_on_screen(states, screen=None):
     images.append(("screen", screen))
     ErrorHandler().report_error(msg, *images)
     raise RuntimeError(msg)
+
 
 class Button(object):
     '''Button is something on screen that can be pressed
@@ -122,13 +126,16 @@ class StatedButton(Button):
        So you can check state, wait for them and whatever else
     '''
     def __init__(self, name, config):
+        self.config = config
         super(StatedButton, self).__init__(name)
-        self.states = self._get_states_info(config)
-        
+        #self.states = self._get_states_info(config)
 
     @utils.add_error_info
     def press_button(self, index=-1, times=1):
-        coords = self._get_coordinates()
+        self.states = self._get_states_info(self.config)
+        print 'here',self.states
+        coords = self._get_coordinates(self.states)
+        print 'coords', coords
         #TODO: if debug mode
         if STATE_DISABLED in self.states:
             images_to_find = list(self.states.itervalues())

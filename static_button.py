@@ -54,6 +54,7 @@ class StaticButton(StatedButton):
 
     @utils.add_error_info
     def _get_coordinates(self):
+        print 'get coord'
         if self.coords is None:
             self.find_on_screen()
         return self.coords

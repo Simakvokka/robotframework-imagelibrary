@@ -62,6 +62,4 @@ class ButtonConstructor(object):
 
         else:
             raise AssertionError("Unknown button type or not implemented yet: {}".format(type))
-
-
         return buttons
