@@ -3,11 +3,11 @@ import os
 import re
 from PIL import Image
 from pytesseract import image_to_string
-from .image_processor import ImageProcessor
-from .error_handler import ErrorHandler
-from .open_cv import MatchObjects
+from ImageLibrary.image_processor import ImageProcessor
+from ImageLibrary.error_handler import ErrorHandler
+from ImageLibrary.open_cv import MatchObjects
 from ImageLibrary import utils
-from .screenshot_operations import ScreenshotOperations
+from ImageLibrary.screenshot_operations import ScreenshotOperations
 from ImageLibrary.GUIProcess import GUIProcess
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 from robot.api import logger as LOGGER
@@ -25,9 +25,9 @@ class Zone(object):
         self.window_area = GUIProcess().get_window_area()
 
         if background is not None:
-            img = ImageProcessor().get_image_to_recognize_with_background(zone, cache, resize_percent, contrast, background, brightness, invert)
+            img = ImageProcessor(self.error_handler, self.screenshot_folder).get_image_to_recognize_with_background(zone, cache, resize_percent, contrast, background, brightness, invert)
         else:
-            img = ImageProcessor().get_image_to_recognize(zone, cache, resize_percent, contrast, invert, brightness, change_mode, self.window_area)
+            img = ImageProcessor(self.error_handler, self.screenshot_folder).get_image_to_recognize(zone, cache, resize_percent, contrast, invert, brightness, change_mode, self.window_area)
 
         if resize > 0:
             resize = int(resize)
@@ -63,11 +63,11 @@ class Zone(object):
     def get_float_number_from_zone(self, zone=None, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, invert=False, brightness=0, change_mode=True):
         self.window_area = GUIProcess().get_window_area()
 
-        img = ImageProcessor().get_image_to_recognize(zone, cache, resize_percent, contrast, invert, brightness, change_mode, self.window_area)
+        img = ImageProcessor(self.error_handler, self.screenshot_folder).get_image_to_recognize(zone, cache, resize_percent, contrast, invert, brightness, change_mode, self.window_area)
 
         if resize > 0:
             resize = int(resize)
-            origFile = ImageProcessor()._make_up_filename()
+            origFile = ImageProcessor(self.error_handler, self.screenshot_folder)._make_up_filename()
             img.save(origFile)
             origresize = Image.open(origFile)
             width, height = origresize.size
@@ -98,9 +98,9 @@ class Zone(object):
         self.window_area = GUIProcess().get_window_area()
 
         if background is not None:
-            img = ImageProcessor().get_image_to_recognize_with_background(zone, cache, resize_percent, contrast, invert, brightness, change_mode)
+            img = ImageProcessor(self.error_handler, self.screenshot_folder).get_image_to_recognize_with_background(zone, cache, resize_percent, contrast, invert, brightness, change_mode)
         else:
-            img = ImageProcessor().get_image_to_recognize(zone, cache, resize_percent, contrast, invert, brightness, change_mode, self.window_area)
+            img = ImageProcessor(self.error_handler, self.screenshot_folder).get_image_to_recognize(zone, cache, resize_percent, contrast, invert, brightness, change_mode, self.window_area)
 
         if resize > 0:
             resize = int(resize)
@@ -137,7 +137,7 @@ class Zone(object):
     def get_text_from_zone(self, zone=None, lang=None, resize_percent=0, contrast=0, cache=False, invert=False, brightness=0, change_mode=True):
         self.window_area = GUIProcess().get_window_area()
 
-        img = ImageProcessor().get_image_to_recognize(zone, cache, resize_percent, contrast, invert, brightness, change_mode, self.window_area)
+        img = ImageProcessor(self.error_handler, self.screenshot_folder).get_image_to_recognize(zone, cache, resize_percent, contrast, invert, brightness, change_mode, self.window_area)
 
         mydir = os.path.abspath(os.path.dirname(__file__))
         resdir = os.path.abspath(os.path.join(os.sep, mydir, r'..\..\resources'))
@@ -158,7 +158,7 @@ class Zone(object):
 
 
     def get_image_from_zone(self, zone):
-        scr = ImageProcessor()._screenshot(zone)
+        scr = ImageProcessor(self.error_handler, self.screenshot_folder)._screenshot(zone)
 
         try:
             output = BuiltIn().get_variable_value('${OUTPUT_DIR}')
@@ -170,31 +170,18 @@ class Zone(object):
 
         return output + '\\scr.png'
 
-    # def is_template_in_zone(self, template, invert=False):
-    #     """Pass template(s) as images to be found on screen in the given zone.
-    #     Takes a screenshot of the passed area and find given data on the screenshot.
-    #     Returns results for each argument."""
-    #
-    #     window_area = GUIProcess().get_window_area()
-    #     screen = ImageProcessor()._get_screenshot(window_area)
-    #
-    #     if invert:
-    #         screen = ScreenshotOperations().invert_image(screen)
-
-    #    return MatchObjects().match_objects_with_knn(screen, template)
-
-    # def match_template_in_zone(self, template, zone, invert=False):
-    #     window_area = GUIProcess().get_window_area()
-    #     screen = ImageProcessor()._get_screenshot(zone, window_area)
-    #
-    #     if invert:
-    #         screen = ScreenshotOperations().invert_image(screen)
-    #
-    #     return MatchObjects().match_objects(template, screen)
-
     def get_template_position(self, template, threshold=None):
         """The same as is_template_in_zone, but returns templates positions after search"""
-        screen = ImageProcessor(self.error_handler)._screenshot()
+        screen = ImageProcessor(self.error_handler, self.screenshot_folder)._screenshot()
 
         return MatchObjects().match_and_return_coordinates(template, screen, threshold)
+
+
+    @utils.debug_only
+    def save_zone_content_to_output(self, zone):
+        '''FOR DEBUG: saves the content (screenshot) of the provided zone. Pass zone. Image is saved in the output folder in launcher
+        '''
+
+        screen_img = ImageProcessor(self.error_handler, self.screenshot_folder)._screenshot(zone)
+        ErrorHandler(self.screenshot_folder).save_pictures([(screen_img, "zone")])
 

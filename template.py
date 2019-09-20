@@ -46,16 +46,17 @@ class Template(object):
 
 
 class ComplexTemplate(object):
-    def __init__(self, error_handler):
+    def __init__(self, error_handler, output_dir):
         self.error_handler = error_handler
+        self.output_dir = output_dir
 
     @utils.add_error_info
     def is_complex_template_on_screen(self, images_set, threshold=0.95, cache=False, zone=None):
         #self.window_area = GUIProcess().get_window_area()
         on_screen = True
-        screen = ImageProcessor(self.error_handler).get_screenshot() if not cache else None
+        screen = ImageProcessor(self.error_handler, self.output_dir).get_screenshot() if not cache else None
         for image in images_set:
-            on_screen &= ImageProcessor(self.error_handler).is_image_on_screen(image, threshold, cache, zone, screen)
+            on_screen &= ImageProcessor(self.error_handler, self.output_dir).is_image_on_screen(image, threshold, cache, zone, screen)
             if not on_screen:
                 break
 
@@ -64,9 +65,9 @@ class ComplexTemplate(object):
     @utils.add_error_info
     def is_any_part_of_complex_template_on_screen(self, images_set, threshold=0.95, cache=False, zone=None):
         #self.window_area = GUIProcess().get_window_area()
-        screen = ImageProcessor(self.error_handler).get_screenshot() if not cache else None
+        screen = ImageProcessor(self.error_handler, self.output_dir).get_screenshot() if not cache else None
         for image in images_set:
-            if ImageProcessor(self.error_handler).is_image_on_screen(image, threshold, cache, zone, screen):
+            if ImageProcessor(self.error_handler, self.output_dir).is_image_on_screen(image, threshold, cache, zone, screen):
                 return True
 
         return False

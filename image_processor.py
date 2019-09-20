@@ -515,3 +515,14 @@ class ImageProcessor(object):
 
         screen_img = self._screenshot(zone)
         ErrorHandler().save_pictures([(screen_img, "zone")])
+
+
+    def is_animating(self, zone, threshold, step):
+        threshold = float(threshold)
+        step = float(step)
+
+        old_screen = self._get_screen(False, zone)
+        utils.sleep(step)
+        new_screen = self._get_screen(False, zone)
+
+        return not self.find_image_result(new_screen, old_screen, threshold).found
