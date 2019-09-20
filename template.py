@@ -4,8 +4,6 @@ from __future__ import absolute_import
 from ImageLibrary.image_processor import ImageProcessor
 from ImageLibrary import utils
 
-#        self.area = GUIProcess().get_window_area()
-
 class Template(object):
 
     def __init__(self, error_handler, output_dir):
@@ -28,7 +26,7 @@ class Template(object):
     def template_should_not_be_on_screen(self, image, threshold=0.95, cache=False, zone=None):
         return ImageProcessor(self.error_handler, self.output_dir).image_should_not_be_on_screen(image, threshold, cache, zone)
 
-    #@utils.add_error_info
+    @utils.add_error_info
     def wait_for_template(self, image, threshold=0.95, timeout=15, zone=None):
         return ImageProcessor(self.error_handler, self.output_dir).wait_for_image(image, threshold, timeout, zone)
 
@@ -52,7 +50,6 @@ class ComplexTemplate(object):
 
     @utils.add_error_info
     def is_complex_template_on_screen(self, images_set, threshold=0.95, cache=False, zone=None):
-        #self.window_area = GUIProcess().get_window_area()
         on_screen = True
         screen = ImageProcessor(self.error_handler, self.output_dir).get_screenshot() if not cache else None
         for image in images_set:
@@ -64,7 +61,6 @@ class ComplexTemplate(object):
 
     @utils.add_error_info
     def is_any_part_of_complex_template_on_screen(self, images_set, threshold=0.95, cache=False, zone=None):
-        #self.window_area = GUIProcess().get_window_area()
         screen = ImageProcessor(self.error_handler, self.output_dir).get_screenshot() if not cache else None
         for image in images_set:
             if ImageProcessor(self.error_handler, self.output_dir).is_image_on_screen(image, threshold, cache, zone, screen):
