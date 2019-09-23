@@ -72,7 +72,7 @@ def add_error_info(func):
     def wrapped(self, *args, **kwargs):
         try:
             return func(self, *args, **kwargs)
-        except Exception as e:
+        except Exception and AttributeError as e:
             raise RuntimeError(str(e) + "; {}.{} {}".format(self.__class__.__name__, func.__name__, self.name))
 
     return wrapped

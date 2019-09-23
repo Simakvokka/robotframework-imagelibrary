@@ -26,27 +26,27 @@ DEFAULT_THRESHOLD = 0.95
 DEFAULT_TIMEOUT = 15
 
 
-def get_image_from_config(config):
-    '''get_image_from_config(config) -> tuple(PIL image, threshold)
-        In almost every place, where you can define image in config, you can write:
-        place:
-            image.png
-        place:
-            image: image.png
-        place:
-            image: image.png
-            threshold: 0.99
-        If threshold is not defined, DEFAULT_THRESHOLD will be used
-    '''
-    if isinstance(config, basestring):
-        return (ImageProcessor().load_image(config), DEFAULT_THRESHOLD)
-    elif isinstance(config, dict):
-        assert "image" in config, "image must be defined"
-        threshold = float(config["threshold"]) if "threshold" in config else DEFAULT_THRESHOLD
-        assert threshold > 0 and threshold <= 1, "Threshold must be in (0, 1]"
-        return (ImageProcessor().load_image(config["image"]), threshold)
-
-    raise AssertionError("Config is malformed: {} is not a valid entry for image".format(config))
+# def get_image_from_config(config):
+#     '''get_image_from_config(config) -> tuple(PIL image, threshold)
+#         In almost every place, where you can define image in config, you can write:
+#         place:
+#             image.png
+#         place:
+#             image: image.png
+#         place:
+#             image: image.png
+#             threshold: 0.99
+#         If threshold is not defined, DEFAULT_THRESHOLD will be used
+#     '''
+#     if isinstance(config, basestring):
+#         return (ImageProcessor().load_image(config), DEFAULT_THRESHOLD)
+#     elif isinstance(config, dict):
+#         assert "image" in config, "image must be defined"
+#         threshold = float(config["threshold"]) if "threshold" in config else DEFAULT_THRESHOLD
+#         assert threshold > 0 and threshold <= 1, "Threshold must be in (0, 1]"
+#         return (ImageProcessor().load_image(config["image"]), threshold)
+#
+#     raise AssertionError("Config is malformed: {} is not a valid entry for image".format(config))
 
 
 class FindResult(object):
@@ -200,7 +200,6 @@ class ImageProcessor(object):
             screen_img = self._get_screen(False, zone)
             result = self.find_image_result(img, screen_img, threshold)
             if result.found:
-                # return result
                 return True
             utils.sleep(0)
             if (datetime.datetime.now() - start_time).seconds > timeout:
@@ -222,7 +221,7 @@ class ImageProcessor(object):
             screen_img = self._screenshot(zone)
             result = self.find_image_result(img, screen_img, threshold)
             if not result.found:
-                return result
+                return True
             utils.sleep(0)
             if (datetime.datetime.now() - start_time).seconds > timeout:
                 break
@@ -236,7 +235,7 @@ class ImageProcessor(object):
     def wait_for_image_to_stop(self, image, threshold=0.95, timeout=15, move_threshold=0.99, step=0.1):
         timeout = float(timeout)
         threshold = float(threshold)
-        move_threshold = float(threshold)
+        move_threshold = float(move_threshold)
         step = float(step)
 
         assert threshold > 0 and threshold <= 1, "Threshold must be in (0, 1]"
@@ -262,7 +261,7 @@ class ImageProcessor(object):
                 if 1 - ds / diag > threshold:
                     return new_pos
 
-            if (datetime.datetime.now() - start_time).seconds > timeout:
+            if (datetime.datetime.now() - start_time).seconds > int(timeout):
                 break
 
         image_info = ("image", new_pos.image)
