@@ -61,11 +61,12 @@ class FindResult(object):
         self.found = found  # was template really found
 
     def get_pos(self):
+        print('pos', self.x, self.y, self.width, self.height)
         return (self.x, self.y, self.width, self.height)
 
 
 class ImageProcessor(object):
-    '''Image processing system - open files if needed, find them on screen, etc'''
+    ###Image processing system - open files if needed, find them on screen, etc
 
     __metaclass__ = Singleton
 
@@ -76,10 +77,9 @@ class ImageProcessor(object):
         self.output_dir = output_dir
 
     def _screenshot(self, zone=None):
-        '''S._screenshot([area]) -> Image
-            Get screenshot of specified area or whole game window if rect is None
-            Coordinates are calculating from left-top corner of window
-        '''
+           #S._screenshot([area]) -> Image
+            # Get screenshot of specified area or whole game window if rect is None
+            # Coordinates are calculating from left-top corner of window
 
         win_area = GUIProcess().get_window_area()
 
@@ -104,14 +104,13 @@ class ImageProcessor(object):
         #raise CanNotOpenImageException(image)
 
     def _get_screen(self, cache=None, zone=None, screen=None):
-        '''S._get_screen(cache, zone, screen) -> PIL image
-            cache - bool, use cached image or make new
-            zone - tuple(x, y, w, h)
-            screen - PIL image. Don't use with cache option
-
-            Cache - user logic, screen - for internal use
-        '''
-
+            # S._get_screen(cache, zone, screen) -> PIL image
+            # cache - bool, use cached image or make new
+            # zone - tuple(x, y, w, h)
+            # screen - PIL image. Don't use with cache option
+            #
+            # Cache - user logic, screen - for internal use
+        
         search_zone = zone
         scr = screen
 
@@ -134,35 +133,35 @@ class ImageProcessor(object):
     def take_cache_screenshot(self):
         return self.get_screenshot()
 
-    def find_image_result(self, img, screen_img, threshold):
+    def _find_image_result(self, img, screen_img, threshold):
         result = OpenCV().find_template(img, screen_img, threshold)
         if result is not None:
             return FindResult(*result, image=img, screen=screen_img, found=True)
         else:
             return FindResult(None, None, None, None, None, image=img, screen=screen_img, found=False)  # nothing found
 
-    def find_image(self, image, threshold=0.95, cache=False, zone=None, screen=None):
-        '''S.find_image(image, threshold, cache, zone) -> FindResult'''
+    def _find_image(self, image, threshold=0.95, cache=False, zone=None, screen=None):
+        ###S._find_image(image, threshold, cache, zone) -> FindResult
         threshold = float(threshold)
         cache = utils.to_bool(cache)
 
         assert threshold > 0 and threshold <= 1, "Threshold must be in (0, 1)"
         screen_img = self._get_screen(cache, zone, screen)
         img = self.load_image(image)
-        return self.find_image_result(img, screen_img, threshold)
+        return self._find_image_result(img, screen_img, threshold)
 
-    def is_image_on_screen(self, image, threshold=0.95, cache=False, zone=None, screen=None):
-        return self.find_image(image, threshold, cache, zone, screen).found
+    def _is_image_on_screen(self, image, threshold=0.95, cache=False, zone=None, screen=None):
+        return self._find_image(image, threshold, cache, zone, screen).found
 
-    def image_should_be_on_screen(self, image, threshold=0.95, cache=False, zone=None, screen=None):
-        result = self.find_image(image, threshold, cache, zone, screen)
+    def _image_should_be_on_screen(self, image, threshold=0.95, cache=False, zone=None, screen=None):
+        result = self._find_image(image, threshold, cache, zone, screen)
         if result.found:
             return True
         self.error_handler.report_warning("First try was unsuccesful")
 
         # try again
         utils.sleep(0.020)
-        result = self.find_image(image, threshold, cache, zone)
+        result = self._find_image(image, threshold, cache, zone)
         if result.found:
             return True
 
@@ -172,15 +171,15 @@ class ImageProcessor(object):
         self.error_handler.report_error(msg, image_info, screen_info)
         raise RuntimeError(msg)
 
-    def image_should_not_be_on_screen(self, image, threshold=0.95, cache=False, zone=None, screen=None):
-        result = self.find_image(image, threshold, cache, zone, screen)
+    def _image_should_not_be_on_screen(self, image, threshold=0.95, cache=False, zone=None, screen=None):
+        result = self._find_image(image, threshold, cache, zone, screen)
         if not result.found:
             return True
         self.error_handler.report_warning("First try was unsuccesful")
 
         # try again
         utils.sleep(0.020)
-        result = self.find_image(image, threshold, cache, zone)
+        result = self._find_image(image, threshold, cache, zone, screen)
         if not result.found:
             return True
 
@@ -190,7 +189,7 @@ class ImageProcessor(object):
         self.error_handler.report_error(msg, image_info, screen_info)
         raise RuntimeError(msg)
 
-    def wait_for_image(self, image, threshold=0.95, timeout=15, zone=None):
+    def _wait_for_image(self, image, threshold=0.95, timeout=15, zone=None):
         timeout = float(timeout)
         start_time = datetime.datetime.now()
 
@@ -198,20 +197,21 @@ class ImageProcessor(object):
 
         while True:
             screen_img = self._get_screen(False, zone)
-            result = self.find_image_result(img, screen_img, threshold)
+            result = self._find_image_result(img, screen_img, threshold)
             if result.found:
                 return True
             utils.sleep(0)
-            if (datetime.datetime.now() - start_time).seconds > timeout:
+            if (datetime.datetime.now() - start_time).seconds > int(timeout):
                 break
 
         image_info = ("image", result.image)
         screen_info = ("screen", result.screen)
-        msg = "Waiting for image was unsucessfull for threshold {}".format(threshold)
+        
+        msg = "Waiting for image was unsucessfull with threshold {} and timeout {} sec".format(threshold, int(timeout))
         self.error_handler.report_warning(msg, image_info, screen_info)
         return False
 
-    def wait_for_image_to_hide(self, image, threshold=0.95, timeout=15, zone=None):
+    def _wait_for_image_to_hide(self, image, threshold=0.95, timeout=15, zone=None):
         timeout = float(timeout)
         start_time = datetime.datetime.now()
 
@@ -219,20 +219,20 @@ class ImageProcessor(object):
 
         while True:
             screen_img = self._screenshot(zone)
-            result = self.find_image_result(img, screen_img, threshold)
+            result = self._find_image_result(img, screen_img, threshold)
             if not result.found:
                 return True
             utils.sleep(0)
-            if (datetime.datetime.now() - start_time).seconds > timeout:
+            if (datetime.datetime.now() - start_time).seconds > int(timeout):
                 break
 
         image_info = ("image", result.image)
         screen_info = ("screen", result.screen)
-        msg = "Waiting for image hide was unsucessfull for threshold {}".format(threshold)
+        msg = "Waiting for image hide was unsucessfull for threshold {} and timeout {}".format(threshold, int(timeout))
         self.error_handler.report_warning(msg, image_info, screen_info)
         return False
 
-    def wait_for_image_to_stop(self, image, threshold=0.95, timeout=15, move_threshold=0.99, step=0.1):
+    def _wait_for_image_to_stop(self, image, threshold=0.95, timeout=15, move_threshold=0.99, step=0.1):
         timeout = float(timeout)
         threshold = float(threshold)
         move_threshold = float(move_threshold)
@@ -246,14 +246,14 @@ class ImageProcessor(object):
         start_time = datetime.datetime.now()
 
         new_screen = self._screenshot()
-        new_pos = self.find_image_result(img, new_screen, threshold)
+        new_pos = self._find_image_result(img, new_screen, threshold)
 
         while True:
             old_scren = new_screen
             old_pos = new_pos
             utils.sleep(step)
             new_screen = self._screenshot()
-            new_pos = self.find_image_result(img, new_screen, threshold)
+            new_pos = self._find_image_result(img, new_screen, threshold)
 
             if old_pos.found and new_pos.found:  # template is on screen, not blinking and whatever else
                 ds = math.hypot(new_pos.x - old_pos.x, new_pos.y - old_pos.y)
@@ -266,12 +266,13 @@ class ImageProcessor(object):
 
         image_info = ("image", new_pos.image)
         screen_info = ("screen", new_pos.screen)
-        msg = "Waiting for image stop was unsucessfull for threshold {}".format(threshold)
+        msg = "Waiting for image stop was unsucessfull for threshold {} and timeout {}".format(threshold, int(timeout))
         self.error_handler.report_warning(msg, image_info, screen_info)
         return False
 
     def find_multiple_images(self, image, threshold=0.95, cache=False, zone=None, screen=None):
-        '''S.find_image(image, threshold, cache, zone) -> list(FindResult)'''
+        ###S._find_image(image, threshold, cache, zone) -> list(FindResult)
+        
 
         threshold = float(threshold)
         cache = utils.to_bool(cache)
@@ -280,25 +281,25 @@ class ImageProcessor(object):
         img = self.load_image(image)
 
         poses = OpenCV().find_multiple_templates(img, screen_img, threshold)
-
+        
         result = []
         for pos in poses:
             result.append(FindResult(*pos, image=img, screen=screen_img, found=True))
 
         return result
 
-    def get_images_count(self, image, threshold=0.95, cache=False, zone=None, screen=None):
+    def _get_images_count(self, image, threshold=0.95, cache=False, zone=None, screen=None):
         return len(self.find_multiple_images(image, threshold, cache, zone, screen))
 
     def find_one_of(self, images, cache=False, zone=None, screen=None):
-        '''Find one of images. The one with max threshold wins and will be returned or None if no one found'''
+        ###Find one of images. The one with max threshold wins and will be returned or None if no one found
         assert len(images) > 0, "At least one image must be set"
 
         screen_img = self._get_screen(False, zone, screen)
         results = []
 
         for image_info in images:
-            result = self.find_image_result(image_info[0], screen_img, float(image_info[1]))
+            result = self._find_image_result(image_info[0], screen_img, float(image_info[1]))
             if result.found:
                 results.append(result)
 
@@ -311,12 +312,12 @@ class ImageProcessor(object):
         pass
 
     def wait_for_one_of(self, images, timeout=15, zone=None):
-        ''' S.wait_for_one_of_images(images, timeout, step, zone) -> bool
-            images - list of (image, threshold, bool)
-                image - PIL image
-                threshold - threshold for image
-                bool - True for wait for show, False for wait for hide
-        '''
+            # S.wait_for_one_of_images(images, timeout, step, zone) -> bool
+            # images - list of (image, threshold, bool)
+            #     image - PIL image
+            #     threshold - threshold for image
+            #     bool - True for wait for show, False for wait for hide
+
         assert len(images) > 0, "You are trying to wait for empty list of images. Really?"
 
         timeout = float(timeout)
@@ -326,7 +327,7 @@ class ImageProcessor(object):
             screen_img = self._screenshot(zone)
             for image_info in images:
                 # todo: optimize
-                result = self.find_image_result(image_info[0], screen_img, float(image_info[1]))
+                result = self._find_image_result(image_info[0], screen_img, float(image_info[1]))
                 if result.found == utils.to_bool(image_info[2]):
                     return result
 
@@ -385,9 +386,9 @@ class ImageProcessor(object):
         return im
 
     def get_image_to_recognize_with_background(self, zone, cache, resize_percent, contrast, background, brightness, invert):
-        ''' Merges the screenshot image and the background and makes a new image with a plain background. After converts image to black and grey colors and inverts
-          colors. Backgorund images of each game are stored in l_screens\background folder. Use the same image name and 'background' parameter name
-           in test: background = game_name'''
+        ### Merges the screenshot image and the background and makes a new image with a plain background. After converts image to black and grey colors and inverts
+          # colors. Backgorund images of each game are stored in l_screens\background folder. Use the same image name and 'background' parameter name
+          #  in test: background = game_name
 
         im = self.check_to_resize(zone, resize_percent)
 
@@ -453,7 +454,7 @@ class ImageProcessor(object):
                             "guiproc-screenshot-%d.png" % (self._screenshot_counter));
 
     # animations
-    def wait_for_animation_stops(self, zone, timeout=DEFAULT_TIMEOUT, threshold=DEFAULT_THRESHOLD, step=0.05):
+    def _wait_for_animation_stops(self, zone, timeout=DEFAULT_TIMEOUT, threshold=DEFAULT_THRESHOLD, step=0.05):
         timeout = float(timeout)
         threshold = float(threshold)
         step = float(step)
@@ -466,7 +467,7 @@ class ImageProcessor(object):
             old_screen = new_screen
             new_screen = self._get_screen(False, zone)
 
-            result = self.find_image_result(new_screen, old_screen, threshold)
+            result = self._find_image_result(new_screen, old_screen, threshold)
             if result.found:
                 return True
             if (datetime.datetime.now() - start_time).seconds > timeout:
@@ -475,7 +476,7 @@ class ImageProcessor(object):
         self.error_handler.report_warning("Timeout exceeded while waiting for animation stops")
         return False
 
-    def wait_for_animation_starts(self, zone, timeout=DEFAULT_TIMEOUT, threshold=DEFAULT_THRESHOLD, step=0.05):
+    def _wait_for_animation_starts(self, zone, timeout=DEFAULT_TIMEOUT, threshold=DEFAULT_THRESHOLD, step=0.05):
         timeout = float(timeout)
         threshold = float(threshold)
         step = float(step)
@@ -488,7 +489,7 @@ class ImageProcessor(object):
             old_screen = new_screen
             new_screen = self._get_screen(False, zone)
 
-            result = self.find_image_result(new_screen, old_screen, threshold)
+            result = self._find_image_result(new_screen, old_screen, threshold)
             if not result.found:
                 return True
             if (datetime.datetime.now() - start_time).seconds > timeout:
@@ -497,7 +498,7 @@ class ImageProcessor(object):
         self.error_handler.report_warning("Timeout exceeded while waiting for animation starts")
         return False
 
-    def is_zone_animating(self, zone, threshold=DEFAULT_THRESHOLD, step=0.5):
+    def _is_zone_animating(self, zone, threshold=DEFAULT_THRESHOLD, step=0.5):
         threshold = float(threshold)
         step = float(step)
 
@@ -505,18 +506,18 @@ class ImageProcessor(object):
         utils.sleep(step)
         new_screen = self._screenshot(zone)
 
-        return not self.find_image_result(new_screen, old_screen, threshold).found
+        return not self._find_image_result(new_screen, old_screen, threshold).found
 
 
     def save_zone_content_to_output(self, zone):
-        '''FOR DEBUG: saves the content (screenshot) of the provided zone. Pass zone. Image is saved in the output folder in launcher
-        '''
+        ###FOR DEBUG: saves the content (screenshot) of the provided zone. Pass zone. Image is saved in the output folder in launcher
+        
 
         screen_img = self._screenshot(zone)
         ErrorHandler().save_pictures([(screen_img, "zone")])
 
 
-    def is_animating(self, zone, threshold, step):
+    def _is_animating(self, zone, threshold, step):
         threshold = float(threshold)
         step = float(step)
 
@@ -524,4 +525,4 @@ class ImageProcessor(object):
         utils.sleep(step)
         new_screen = self._get_screen(False, zone)
 
-        return not self.find_image_result(new_screen, old_screen, threshold).found
+        return not self._find_image_result(new_screen, old_screen, threshold).found

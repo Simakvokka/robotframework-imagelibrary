@@ -13,7 +13,6 @@ from ImageLibrary.image_processor import ImageProcessor
 __version__ = '0.1.0'
 ROBOT_LIBRARY_SCOPE = 'GLOBAL'
 
-
 class ImageLibrary(Template, ComplexTemplate, GUIProcess, Zone, Animations, ImageProcessor):
     
     def __init__(self, screenshot_folder=None):

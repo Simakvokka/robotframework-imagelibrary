@@ -6,7 +6,7 @@ delta = 20
 
 
 def remove_noise(data):
-    '''Remove noise from set'''
+    #Remove noise from set
     if not data:
         return data
 
@@ -22,10 +22,10 @@ def remove_noise(data):
     return data
 
 def to_bool(b):
-    '''_to_bool(b) -> bool
-        Converts string, containing 'True' or 'False' to corresponding bool
-        If b is bool return itself
-    '''
+        #_to_bool(b) -> bool
+        # Converts string, containing 'True' or 'False' to corresponding bool
+        # If b is bool return itself
+    
     if (isinstance(b, bool)):
         return b
 
@@ -44,11 +44,11 @@ import warnings
 import functools
 
 def deprecated(func):
-    """This is a decorator which can be used to mark functions
-    as deprecated. It will result in a warning being emmitted
-    when the function is used.
-
-    It was taken from http://stackoverflow.com/a/30253848"""
+    # This is a decorator which can be used to mark functions
+    # as deprecated. It will result in a warning being emmitted
+    # when the function is used.
+    #
+    # It was taken from http://stackoverflow.com/a/30253848
 
     @functools.wraps(func)
     def new_func(*args, **kwargs):

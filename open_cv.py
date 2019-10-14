@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
+from future.utils import iterkeys, itervalues
 import cv2
 from ImageLibrary import imutils
 from PIL import Image
@@ -19,17 +20,17 @@ class OpenCV(object):
 
         try:
             if cv2.ocl.useOpenCL():
-                LOGGER.info("OpenCV module uses OpenCL")
+                LOGGER.debug("OpenCV module uses OpenCL")
             else:
                 LOGGER.info("OpenCV module doesn't use OpenCL")
         except AttributeError:
             LOGGER.info("OpenCV module doesn't support OpenCL at all")
 
     def prepare_image(self, img):
-        '''S.prepare_image(img) -> np.ndarray
-            If img is string, opens corresponding image
-            If img is PIL image, converts it to numpy array and change colors to grayscale
-        '''
+           # S.prepare_image(img) -> np.ndarray
+           # If img is string, opens corresponding image
+           # If img is PIL image, converts it to numpy array and change colors to grayscale
+
         prepared = None
         if isinstance(img, str):
             prepared = cv2.imread(img, cv2.IMREAD_GRAYSCALE)
@@ -63,7 +64,8 @@ class OpenCV(object):
         #1 find points for every district
         districts = {}
         for pt in array:
-            for key in districts.iterkeys():
+            #for key in districts.iterkeys():
+            for key in iterkeys(districts):
                 if points_in_the_same_district(pt, key, width, height):
                     districts[key].append(pt)
                     break
@@ -73,7 +75,8 @@ class OpenCV(object):
         #2 sort every district by threshold
         #3 point with max thershold wins
         result = []
-        for district in districts.itervalues():
+        #for district in districts.itervalues():
+        for district in itervalues(districts):
             sorted_district = sorted(district, key=lambda tup: tup[4], reverse=True)
             result.append(sorted_district[0])
 
@@ -83,7 +86,7 @@ class OpenCV(object):
         return result
 
     def find_template(self, what, where, threshold=0.75):
-        '''S.find_template_pos_and_thershold(what, where) -> pos, thershold'''
+        #S.find_template_pos_and_thershold(what, where) -> pos, thershold
         screen = self.prepare_image(where)
         tmpl = self.prepare_image(what)
         threshold = float(threshold)
@@ -118,12 +121,11 @@ class OpenCV(object):
         return pos
 
     def prepare_image_to_recognize(self, img):
-        '''S.prepare_image_to_recognize(img) -> PIL image'''
+        #S.prepare_image_to_recognize(img) -> PIL image
         if img.mode == 'P':
             prep = np.array(img.convert('RGBA'))
         else:
             prep = np.array(img)
-
         prep = cv2.cvtColor(prep, cv2.COLOR_RGB2GRAY)
         prep -= prep.min()
         max = prep.max()
@@ -138,6 +140,44 @@ class MatchObjects(object):
         self.found = None
 
     def match_objects(self, img, screen, threshold=0.98):
+        #load the image image, convert it to grayscale, and detect edges
+        template = cv2.imread(img)
+        template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+        template = cv2.Canny(template, 50, 200)
+        (tH, tW) = template.shape[:2]
+        cv2.imwrite('templ.png', template)
+
+
+        #convert PIL Image into cv2 format:
+        image = np.asarray(screen)
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+        for scale in np.linspace(0.2, 1.0, 20)[::-1]:
+
+            resized = imutils.resize(gray, width = int(gray.shape[1] * scale))
+            r = gray.shape[1] / float(resized.shape[1])
+
+            if resized.shape[0] < tH or resized.shape[1] < tW:
+                break
+
+            edged = cv2.Canny(resized, 50, 200)
+            #result = cv2.matchTemplate(edged, template, cv2.TM_CCOEFF)
+            result = cv2.matchTemplate(edged, template, cv2.TM_CCORR_NORMED)
+            (_, maxVal, _, maxLoc) = cv2.minMaxLoc(result)
+            print(_, maxVal, _, maxLoc)
+
+            if maxVal >= threshold:
+                clone = np.dstack([edged, edged, edged])
+                cv2.rectangle(clone, (maxLoc[0], maxLoc[1]), (maxLoc[0] + tW, maxLoc[1] + tH), (0, 0, 255), 2)
+                cv2.imwrite('screen.png', clone)
+
+                return True
+            else:
+                LOGGER.error('No matching template found.')
+            return False
+
+    #use it when prepairing yaml file
+    def match_and_return_coordinates(self, img, screen, threshold):
         #load the image image, convert it to grayscale, and detect edges
         template = cv2.imread(img)
         template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
@@ -161,42 +201,9 @@ class MatchObjects(object):
             #result = cv2.matchTemplate(edged, template, cv2.TM_CCOEFF)
             result = cv2.matchTemplate(edged, template, cv2.TM_CCORR_NORMED)
             (_, maxVal, _, maxLoc) = cv2.minMaxLoc(result)
-
-            if maxVal >= threshold:
-                clone = np.dstack([edged, edged, edged])
-                cv2.rectangle(clone, (maxLoc[0], maxLoc[1]), (maxLoc[0] + tW, maxLoc[1] + tH), (0, 0, 255), 2)
-                cv2.imwrite('screen.png', clone)
-
-                return True
-            else:
-                LOGGER.error('No matching template found.')
-            return False
-
-    #use it when prepairing yaml file
-    def match_and_return_coordinates(self, img, screen, threshold=0.98):
-        #load the image image, convert it to grayscale, and detect edges
-        template = cv2.imread(img)
-        template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
-        template = cv2.Canny(template, 50, 200)
-        (tH, tW) = template.shape[:2]
-        #cv2.imwrite('templ.png', template)
-
-        #convert PIL Image into cv2 format:
-        image = np.asarray(screen)
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-        for scale in np.linspace(0.2, 1.0, 20)[::-1]:
-
-            resized = imutils.resize(gray, width = int(gray.shape[1] * scale))
-            r = gray.shape[1] / float(resized.shape[1])
-
-            if resized.shape[0] < tH or resized.shape[1] < tW:
-                break
-
-            edged = cv2.Canny(resized, 50, 200)
-            #result = cv2.matchTemplate(edged, template, cv2.TM_CCOEFF)
-            result = cv2.matchTemplate(edged, template, cv2.TM_CCORR_NORMED)
-            (_, maxVal, _, maxLoc) = cv2.minMaxLoc(result)
+            
+            print(maxVal)
+            print(threshold)
 
             if maxVal >= threshold:
                 clone = np.dstack([edged, edged, edged])

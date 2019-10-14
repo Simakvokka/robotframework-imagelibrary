@@ -3,14 +3,11 @@
 
 import os
 import time
-import re
 
 import pyautogui as ag
-from pytesseract import image_to_string
 from robot.api import logger as LOGGER
 from robot.libraries import Process
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
-from PIL import Image
 
 ag.FAILSAFE = False
 
@@ -19,7 +16,7 @@ if hasattr(ag, '_pyautogui_x11'):
 elif hasattr(ag, '_pyautogui_win'):
     from . import _gui_win as _gui
 else:
-    raise NotImplementedError("GUIProcess not supported this platform!")
+    raise NotImplementedError("GUIProcess does not support this platform!")
 
 
 class GUIProcess(Process.Process):

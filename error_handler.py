@@ -13,7 +13,6 @@ from ImageLibrary.GUIProcess import GUIProcess
 
 
 class ErrorHandler(object):
-    '''Slotbot error reporter'''
 
     __metaclass__ = Singleton
 
