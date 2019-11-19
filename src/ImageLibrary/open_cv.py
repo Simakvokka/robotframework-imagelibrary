@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
-from future.utils import iterkeys, itervalues
+
 import cv2
 from ImageLibrary import imutils
 from PIL import Image
+from future.utils import iterkeys, itervalues
 
 try:
     from SlotBot import errors
@@ -27,9 +28,9 @@ class OpenCV(object):
             LOGGER.info("OpenCV module doesn't support OpenCL at all")
 
     def prepare_image(self, img):
-           # S.prepare_image(img) -> np.ndarray
-           # If img is string, opens corresponding image
-           # If img is PIL image, converts it to numpy array and change colors to grayscale
+        """prepare_image(img) -> np.ndarray
+        If img is string, opens corresponding image
+        If img is PIL image, converts it to numpy array and change colors to grayscale"""
 
         prepared = None
         if isinstance(img, str):
@@ -86,7 +87,7 @@ class OpenCV(object):
         return result
 
     def find_template(self, what, where, threshold=0.75):
-        #S.find_template_pos_and_thershold(what, where) -> pos, thershold
+        """find_template_pos_and_thershold(what, where) -> pos, thershold"""
         screen = self.prepare_image(where)
         tmpl = self.prepare_image(what)
         threshold = float(threshold)
@@ -121,7 +122,7 @@ class OpenCV(object):
         return pos
 
     def prepare_image_to_recognize(self, img):
-        #S.prepare_image_to_recognize(img) -> PIL image
+        """prepare_image_to_recognize(img) -> PIL image"""
         if img.mode == 'P':
             prep = np.array(img.convert('RGBA'))
         else:
@@ -164,7 +165,7 @@ class MatchObjects(object):
             #result = cv2.matchTemplate(edged, template, cv2.TM_CCOEFF)
             result = cv2.matchTemplate(edged, template, cv2.TM_CCORR_NORMED)
             (_, maxVal, _, maxLoc) = cv2.minMaxLoc(result)
-            print(_, maxVal, _, maxLoc)
+            #print(_, maxVal, _, maxLoc)
 
             if maxVal >= threshold:
                 clone = np.dstack([edged, edged, edged])
@@ -183,7 +184,7 @@ class MatchObjects(object):
         template = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
         template = cv2.Canny(template, 50, 200)
         (tH, tW) = template.shape[:2]
-        cv2.imwrite('templ.png', template)
+        #cv2.imwrite('templ.png', template)
 
         #convert PIL Image into cv2 format:
         image = np.asarray(screen)
@@ -201,9 +202,6 @@ class MatchObjects(object):
             #result = cv2.matchTemplate(edged, template, cv2.TM_CCOEFF)
             result = cv2.matchTemplate(edged, template, cv2.TM_CCORR_NORMED)
             (_, maxVal, _, maxLoc) = cv2.minMaxLoc(result)
-            
-            print(maxVal)
-            print(threshold)
 
             if maxVal >= threshold:
                 clone = np.dstack([edged, edged, edged])

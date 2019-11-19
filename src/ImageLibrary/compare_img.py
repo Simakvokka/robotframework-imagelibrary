@@ -9,26 +9,29 @@ class ImageComparison(object):
 
 
     def mse(self, imageA, imageB):
-        # the 'Mean Squared Error' between the two images is the
-        # sum of the squared difference between the two images;
-        # NOTE: the two images must have the same dimension
+        """
+        The 'Mean Squared Error' between the two images is the
+        sum of the squared difference between the two images;
+        NOTE: the two images must have the same dimension
+        """
+        
         err = np.sum((imageA.astype("float") - imageB.astype("float")) ** 2)
         err /= float(imageA.shape[0] * imageA.shape[1])
 
-        # return the MSE, the lower the error, the more "similar"
-        # the two images are
+        # return the MSE, the lower the error, the more "similar" the two images are
         return err
 
 
     def compare(self, imageA, imageB, title):
-        # compute the mean squared error and structural similarity
-        # index for the images
+        """Computes the mean squared error and structural similarity
+        index for the images"""
+        
         m = self.mse(imageA, imageB)
         s = ssim(imageA, imageB)
 
         a = float("{0:.2f}".format(s))
         b = float("{0:.2f}".format(m))
-        print('SSIM:', a, 'MSE:', b)
+
         if a < 0.65 or a == 1:
             return True
         else:

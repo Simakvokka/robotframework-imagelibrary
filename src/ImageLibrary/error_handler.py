@@ -1,20 +1,18 @@
 from __future__ import absolute_import
 
-from collections import deque
 import os
 import os.path
+from collections import deque
+
 import pyautogui
 from robot.api import logger as LOGGER
 
 pyautogui.FAILSAFE = False
 
-from ImageLibrary.singleton import Singleton
 from ImageLibrary.GUIProcess import GUIProcess
 
 
 class ErrorHandler(object):
-
-    __metaclass__ = Singleton
 
     HISTORY_SIZE = 50
 
@@ -41,7 +39,6 @@ class ErrorHandler(object):
         screenshot_name = "state-{}.png".format(self.screenshot_counter)
         self.screenshot_counter += 1
         self.area = GUIProcess().get_window_area()
-
 
         screen_img = pyautogui.screenshot(region=self.area)
 

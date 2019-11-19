@@ -1,0 +1,8 @@
+robotframework
+opencv-python
+pyautogui
+numpy
+pytesseract
+scikit-image
+pillow
+future

@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 
-
 from ImageLibrary.image_processor import ImageProcessor
 from ImageLibrary import utils
+
 
 class Template(object):
 
@@ -12,9 +12,9 @@ class Template(object):
 
     @utils.add_error_info
     def find_template(self, image, threshold=0.95, cache=False, zone=None):
-        """Finds the match with given template on the active screen. 
+        """Finds the match with given template on screen.
         
-            All args except template 'image' are optional. 
+            All args except template are optional.
             
             Returns *bool*
             
@@ -22,11 +22,8 @@ class Template(object):
         | ${template} = | Find Template | template | threshold=0.95 | zone=[x  y  w  h]
         
         """
-        result = ImageProcessor(self.error_handler, self.output_dir)._find_image(image, threshold, cache, zone)
-        if result.found:
-            return  True
-        else:
-            return False
+
+        return ImageProcessor(self.error_handler, self.output_dir).find_image(image, threshold, cache, zone)
 
     @utils.add_error_info
     def is_template_on_screen(self, image, threshold=0.95, cache=False, zone=None):
@@ -56,14 +53,14 @@ class Template(object):
         return ImageProcessor(self.error_handler, self.output_dir)._image_should_be_on_screen(image, threshold, cache, zone)
         
     @utils.add_error_info
-    def template_should_not_be_on_screen(self, image, threshold=0.95, zone=None):
+    def template_should_not_be_on_screen(self, image, threshold=0.95, cache=False, zone=None):
         """The opposite of 'Template Should Be On Screen'. Validates the absense of the given template on screen.
         
         Examples:
         | ${template} = | Template Should Not Be On Screen | template | threshold=0.95 | zone=[x  y  w  h]
         
         """
-        return ImageProcessor(self.error_handler, self.output_dir)._image_should_not_be_on_screen(image, threshold, zone)
+        return ImageProcessor(self.error_handler, self.output_dir)._image_should_not_be_on_screen(image, threshold, cache, zone)
         
     @utils.add_error_info
     def wait_for_template(self, image, threshold=0.95, timeout=15, zone=None):
@@ -140,7 +137,7 @@ class ComplexTemplate(object):
         self.output_dir = output_dir
 
     @utils.add_error_info
-    def is_complex_template_on_screen(self, images_set, threshold=0.95, cache=False, zone=None):
+    def is_complex_template_on_screen(self, templates_set, threshold=0.95, cache=False, zone=None):
         """Checks if the elements of the given templates set are on screen. Returns *bool*: True if all the parts from the
         set are found.
             
@@ -153,7 +150,7 @@ class ComplexTemplate(object):
         
         on_screen = True
         screen = ImageProcessor(self.error_handler, self.output_dir).get_screenshot()
-        for image in images_set:
+        for image in templates_set:
             on_screen &= ImageProcessor(self.error_handler, self.output_dir)._is_image_on_screen(image, threshold, cache, zone, screen)
             if not on_screen:
                 break
@@ -161,17 +158,15 @@ class ComplexTemplate(object):
         return on_screen
 
     @utils.add_error_info
-    def is_any_part_of_complex_template_on_screen(self, images_set, threshold=0.95, cache=False, zone=None):
+    def is_any_part_of_complex_template_on_screen(self, templates_set, threshold=0.95, cache=False, zone=None):
         """Checks if any template from the given templates set is on the screen. Returns *bool*: True if at least one occurence matches the set.
-            You can
         
         Examples:
         | ${complex_template} =  Is Any Part Of Complex Template On Screen | templates_set | threshold=0.95 | zone=None
         
         """
         screen = ImageProcessor(self.error_handler, self.output_dir).get_screenshot()
-        print(images_set)
-        for image in images_set:
+        for image in templates_set:
             if ImageProcessor(self.error_handler, self.output_dir)._is_image_on_screen(image, threshold, cache, zone, screen):
                 return True
 

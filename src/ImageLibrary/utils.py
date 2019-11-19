@@ -22,9 +22,9 @@ def remove_noise(data):
     return data
 
 def to_bool(b):
-        #_to_bool(b) -> bool
-        # Converts string, containing 'True' or 'False' to corresponding bool
-        # If b is bool return itself
+    """_to_bool(b) -> bool
+      Converts string, containing 'True' or 'False' to corresponding bool
+      If b is bool return itself"""
     
     if (isinstance(b, bool)):
         return b
