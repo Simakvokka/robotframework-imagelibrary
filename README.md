@@ -1,28 +1,28 @@
-#About 
+*About*
 
 **ImageLibrary** is designed to automate cases involving various types of screen processing with RoboFramework.
 
-###It operates with:
+*It operates with:*
 - OpenCV
 - TesseractOCR
 
 
-###Installation
+*Installation*
 
 pip install robotframework-imagelibrary
 
-###Keywords
+*Keywords*
 
 [Keyword documentation](http://Simakvokka.github.io/ImageLibrary/docs/ImageLibrary.html)
 
-###Installation Requirements
+*Installation Requirements*
 - [Python] (https://www.python.org/downloads/) **2.7**, **3.5+**.
 - Robot Framework
 - [TesseractOCR] (https://github.com/tesseract-ocr/tesseract) - for number and text recognition. May not be installed if not planned to use. 
 Install the [3.02 version for your OS] (https://github.com/tesseract-ocr/tesseract/wiki)
 
 
-###Usage
+*Usage*
 Implement the _ImageLibrary_ into robot test suite file with specifying the _output_ directory to store screenshots.
 
 Example
