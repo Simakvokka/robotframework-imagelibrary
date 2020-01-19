@@ -18,7 +18,7 @@ from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 pyautogui.FAILSAFE = False
 pyautogui.PAUSE = 0.05
 
-DEFAULT_THRESHOLD = 0.95
+DEFAULT_THRESHOLD = 0.99
 DEFAULT_TIMEOUT = 15
 
 
@@ -39,7 +39,7 @@ DEFAULT_TIMEOUT = 15
 #     elif isinstance(config, dict):
 #         assert "image" in config, "image must be defined"
 #         threshold = float(config["threshold"]) if "threshold" in config else DEFAULT_THRESHOLD
-#         assert threshold > 0 and threshold <= 1, "Threshold must be in (0, 1]"
+#         assert threshold > 0 and threshold <= 1, "Threshold must be in (0, 1)"
 #         return (ImageProcessor().load_image(config["image"]), threshold)
 #
 #     raise AssertionError("Config is malformed: {} is not a valid entry for image".format(config))
@@ -134,33 +134,34 @@ class ImageProcessor(object):
         else:
             return FindResult(None, None, None, None, None, image=img, screen=screen_img, found=False)  # nothing found
     
-    def _find_image(self, image, threshold=0.95, cache=False, zone=None, screen=None):
+    def _find_image(self, image, threshold=0.99, cache=False, zone=None, screen=None):
         # _find_image(image, threshold, cache, zone) -> FindResult
         threshold = float(threshold)
         cache = utils.to_bool(cache)
         
-        assert threshold > 0 and threshold <= 1, "Threshold must be in (0, 1)"
+        assert threshold > 0 and threshold <= 1, "Threshold must be between (0, 1)"
         screen_img = self._get_screen(cache, zone, screen)
         img = self.load_image(image)
         return self._find_image_result(img, screen_img, threshold)
     
-    def find_image(self, image, threshold=0.95, cache=False, zone=None, screen=None):
-        result = ImageProcessor(self.error_handler, self.output_dir)._find_image(image, threshold, cache, zone, screen).found
+    def find_image(self, image, threshold=0.99, cache=False, zone=None, screen=None):
+        result = ImageProcessor(self.error_handler, self.output_dir)._find_image(image, threshold, cache, zone,
+                                                                                 screen).found
         if result:
             LOGGER.info('Template was found on screen with threshold:{}'.format(threshold))
-            return  True
+            return True
         else:
             LOGGER.info('Template was not found on screen with threshold {}'.format(threshold))
             return False
     
-    def _is_image_on_screen(self, image, threshold=0.95, cache=False, zone=None, screen=None):
+    def _is_image_on_screen(self, image, threshold=0.99, cache=False, zone=None, screen=None):
         return self._find_image(image, threshold, cache, zone, screen).found
     
-    def _image_should_be_on_screen(self, image, threshold=0.95, cache=False, zone=None, screen=None):
+    def _image_should_be_on_screen(self, image, threshold=0.99, cache=False, zone=None, screen=None):
         result = self._find_image(image, threshold, cache, zone, screen)
         if result.found:
             return True
-        self.error_handler.report_warning("First try was unsuccesful")
+        self.error_handler.report_warning("First try was unsuccessful")
         
         # try again
         utils.sleep(0.020)
@@ -174,11 +175,11 @@ class ImageProcessor(object):
         self.error_handler.report_error(msg, image_info, screen_info)
         raise RuntimeError(msg)
     
-    def _image_should_not_be_on_screen(self, image, threshold=0.95, cache=False, zone=None, screen=None):
+    def _image_should_not_be_on_screen(self, image, threshold=0.99, cache=False, zone=None, screen=None):
         result = self._find_image(image, threshold, cache, zone, screen)
         if not result.found:
             return True
-        self.error_handler.report_warning("First try was unsuccesful")
+        self.error_handler.report_warning("First try was unsuccessful")
         
         # try again
         utils.sleep(0.020)
@@ -188,11 +189,11 @@ class ImageProcessor(object):
         
         image_info = ("image", result.image)
         screen_info = ("screen", result.screen)
-        msg = "Image was found at screen with threshold {}".format(threshold)
+        msg = "Image was found on screen with threshold {}".format(threshold)
         self.error_handler.report_error(msg, image_info, screen_info)
         raise RuntimeError(msg)
     
-    def _wait_for_image(self, image, threshold=0.95, timeout=15, zone=None):
+    def _wait_for_image(self, image, threshold=0.99, timeout=15, zone=None):
         timeout = float(timeout)
         start_time = datetime.datetime.now()
         
@@ -210,11 +211,11 @@ class ImageProcessor(object):
         image_info = ("image", result.image)
         screen_info = ("screen", result.screen)
         
-        msg = "Waiting for image was unsucessfull with threshold {} and timeout {} sec".format(threshold, int(timeout))
+        msg = "Waiting for image was unsucessful with threshold {} and timeout {} sec".format(threshold, int(timeout))
         self.error_handler.report_warning(msg, image_info, screen_info)
         return False
     
-    def _wait_for_image_to_hide(self, image, threshold=0.95, timeout=15, zone=None):
+    def _wait_for_image_to_hide(self, image, threshold=0.99, timeout=15, zone=None):
         timeout = float(timeout)
         start_time = datetime.datetime.now()
         
@@ -231,18 +232,18 @@ class ImageProcessor(object):
         
         image_info = ("image", result.image)
         screen_info = ("screen", result.screen)
-        msg = "Waiting for image hide was unsucessfull for threshold {} and timeout {}".format(threshold, int(timeout))
+        msg = "Waiting for image hide was unsuccessful for threshold {} and timeout {}".format(threshold, int(timeout))
         self.error_handler.report_warning(msg, image_info, screen_info)
         return False
     
-    def _wait_for_image_to_stop(self, image, threshold=0.95, timeout=15, move_threshold=0.99, step=0.1):
+    def _wait_for_image_to_stop(self, image, threshold=0.99, timeout=15, move_threshold=0.99, step=0.1):
         timeout = float(timeout)
         threshold = float(threshold)
         move_threshold = float(move_threshold)
         step = float(step)
         
-        assert threshold > 0 and threshold <= 1, "Threshold must be in (0, 1]"
-        assert move_threshold > 0 and move_threshold <= 1, "Move threshold must be in (0, 1]"
+        assert threshold > 0 and threshold <= 1, "Threshold must be between in (0, 1)"
+        assert move_threshold > 0 and move_threshold <= 1, "Move threshold must be between (0, 1)"
         
         img = self.load_image(image)
         
@@ -269,11 +270,11 @@ class ImageProcessor(object):
         
         image_info = ("image", new_pos.image)
         screen_info = ("screen", new_pos.screen)
-        msg = "Waiting for image stop was unsucessfull for threshold {} and timeout {}".format(threshold, int(timeout))
+        msg = "Waiting for image stop was unsuccessful for threshold {} and timeout {}".format(threshold, int(timeout))
         self.error_handler.report_warning(msg, image_info, screen_info)
         return False
     
-    def find_multiple_images(self, image, threshold=0.95, cache=False, zone=None, screen=None):
+    def find_multiple_images(self, image, threshold=0.99, cache=False, zone=None, screen=None):
         # _find_image(image, threshold, cache, zone) -> list(FindResult)
         
         
@@ -291,7 +292,7 @@ class ImageProcessor(object):
         
         return result
     
-    def _get_images_count(self, image, threshold=0.95, cache=False, zone=None, screen=None):
+    def _get_images_count(self, image, threshold=0.99, cache=False, zone=None, screen=None):
         return len(self.find_multiple_images(image, threshold, cache, zone, screen))
     
     def find_one_of(self, images, cache=False, zone=None, screen=None):
@@ -350,76 +351,86 @@ class ImageProcessor(object):
         pass
     
     def resize_image(self, resize_percent, origFile):
+        img = Image.open(origFile)
+        resize_percent = int(resize_percent) * 10
+        wpercent = (int(resize_percent) / float(img.size[0]))
+        hsize = int((float(img.size[1]) * float(wpercent)))
+        img = img.resize((int(resize_percent), hsize), Image.ANTIALIAS)
+        img.save('resized.png')
         
-        origresize = Image.open(origFile)
-        width, height = origresize.size
-        width_resize = width * int(resize_percent) / width + width
-        height_resize = height * int(resize_percent) / height + height
-        origresize = origresize.resize((int(round(width_resize)), int(round(height_resize))), Image.ANTIALIAS)
-        
-        return origresize
-    
-    def get_image_to_recognize(self, zone, cache, resize_percent, contrast, invert, brightness, change_mode, win_area):
+        return img
+
+    def get_image_to_recognize(self, zone, resize_percent, contrast, invert, brightness, change_mode, win_area, cache):
         
         im = self.check_to_resize(zone, resize_percent)
-        
+    
         if change_mode:
             im = self.cv.prepare_image_to_recognize(im)
         
         if invert:
             im = self.cv.prepare_image_to_recognize(im)
             im = ImageOps.invert(im)
+            im.save('inverted.png')
         
         if contrast != 0 and brightness != 0:
             im = ScreenshotOperations().change_brightness(im, brightness)
             im = ScreenshotOperations().change_contrast(im, contrast)
-        
-        else:
-            if contrast != 0:
-                im = ScreenshotOperations().change_contrast(im, contrast)
-            
-            elif brightness > 0:
-                im = ScreenshotOperations().change_brightness(im, brightness)
+            im.save('contrast_and_brightness.png')
 
+        
+        elif contrast != 0:
+            im = ScreenshotOperations().change_contrast(im, contrast)
+            im.save('contrasted.png')
+
+        elif brightness != 0:
+            im = ScreenshotOperations().change_brightness(im, brightness)
+            im.save('brightness.png')
+            
         return im
     
-    def get_image_to_recognize_with_background(self, zone, cache, resize_percent, contrast, background, brightness,
-                                               invert):
+    def get_image_to_recognize_with_background(self, zone, resize_percent, contrast, background, brightness,
+                                               invert, cache):
         ### Merges the screenshot image and the background and makes a new image with a plain background. After converts image to black and grey colors and inverts
-        # colors. Backgorund images of each game are stored in l_screens\background folder. Use the same image name and 'background' parameter name
+        # colors. Background images of each game are stored in l_screens\background folder. Use the same image name and 'background' parameter name
         #  in test: background = game_name
         
         im = self.check_to_resize(zone, resize_percent)
         
-        directory = os.path.abspath(os.path.dirname(__file__))
-        background_dir = os.path.abspath(os.path.join(directory, r'..\..\launcher\l_screens\background'))
-        output_dir = os.path.abspath(r'..\output')
+        result = im
         
-        for file in os.listdir(background_dir):
-            if file.startswith(background):
-                image1 = Image.open(background_dir + '\\' + file)
+        if background is not None:
+            image1 = Image.open(background)
+            try:
                 image = ImageChops.difference(image1, im)
                 image = image.convert('L')
                 result = ImageOps.invert(image)
-                
-                if contrast and brightness != 0:
-                    result = ScreenshotOperations().change_contrast(result, contrast)
-                    result = ScreenshotOperations().change_brightness(result, brightness)
-                
-                elif brightness != 0:
-                    result = ScreenshotOperations().change_brightness(result, brightness)
-
-                elif contrast != 0:
-                    result = ScreenshotOperations().change_contrast(result, contrast)
-                
-                if invert:
-                    result = ImageOps.invert(result)
-
-                return result
+            except ValueError:
+                LOGGER.error('Images do not match. To remove background images should be the same size.')
+                raise
+        
+        if contrast and brightness != 0:
+            result = ScreenshotOperations().change_contrast(result, contrast)
+            result = ScreenshotOperations().change_brightness(result, brightness)
+            result.save('contrast_and_brightness.png')
+        
+        elif brightness != 0:
+            result = ScreenshotOperations().change_brightness(result, brightness)
+            result.save('brightness.png')
+        
+        elif contrast != 0:
+            result = ScreenshotOperations().change_contrast(result, contrast)
+            result.save('contrast.png')
+        
+        if invert:
+            result = ImageOps.invert(result)
+            result.save('invert.png')
+        
+        return result
     
     def check_to_resize(self, zone, resize_percent):
         orig = self._screenshot(zone)
         origFile = self._make_up_filename()
+        orig.save(origFile)
         
         if resize_percent != 0:
             resized = self.resize_image(resize_percent, origFile)
@@ -442,7 +453,7 @@ class ImageProcessor(object):
         self._screenshot_counter += 1
         
         return os.path.join(output,
-                            "guiproc-screenshot-%d.png" % (self._screenshot_counter))
+                            "guiproc-screenshot-%d.png" % self._screenshot_counter)
     
     # animations
     def _wait_for_animation_stops(self, zone, timeout=DEFAULT_TIMEOUT, threshold=DEFAULT_THRESHOLD, step=0.05):

@@ -14,13 +14,13 @@ class Animations(object):
         
     ####    ANIMATIONS      ####
     @utils.add_error_info
-    def wait_for_animation_stops(self, zone=None, timeout=15, threshold=0.9, step=0.1):
+    def wait_for_animation_stops(self, zone=None, timeout=15, threshold=0.99, step=0.1):
         """Wait until animation stops in the given zone or in the whole active window if zone is not provided.
         Pass _zone_, _timeout_, _step_, _thrreshold_ as arguments. All are optional.
         Default values are given in the example.
 
         Examples:
-        | Wait For Animation Stops | zone=zone_coordinates | timeout=15 | threshold=0.95 | step=0.1
+        | Wait For Animation Stops | zone=zone_coordinates | timeout=15 | threshold=0.99 | step=0.1
         
         """
 
@@ -28,13 +28,13 @@ class Animations(object):
 
 
     @utils.add_error_info
-    def wait_for_animation_starts(self, zone=None, timeout=15, threshold=0.9, step=0.1):
+    def wait_for_animation_starts(self, zone=None, timeout=15, threshold=0.99, step=0.1):
         """Same as `Wait For Animation Stops` but on the contrary.
         Pass _zone_, _timeout_, _step_, _thrreshold_ as arguments. All are optional.
         Default values are given in the example.
 
         Examples:
-        | Wait For Animation Starts | zone=zone_coordinates | timeout=15 | threshold=0.95 | step=0.1
+        | Wait For Animation Starts | zone=zone_coordinates | timeout=15 | threshold=0.99 | step=0.1
         
         """
 

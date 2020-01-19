@@ -8,7 +8,7 @@ from ImageLibrary.error_handler import ErrorHandler
 from ImageLibrary.template import Template, ComplexTemplate
 from ImageLibrary.zone import Zone
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 ROBOT_LIBRARY_SCOPE = 'GLOBAL'
 
 

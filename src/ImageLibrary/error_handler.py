@@ -32,7 +32,7 @@ class ErrorHandler(object):
                 pass
 
         i = img.convert('RGB')
-        i.save(os.path.join(self.screenshot_folder, name), "JPEG", quality=50)
+        i.save(os.path.join(self.screenshot_folder, name), "JPEG", quality=100)
 
     def save_state(self, level="INFO"):
 
