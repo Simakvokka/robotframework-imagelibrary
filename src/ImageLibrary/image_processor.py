@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import division
 
 import datetime
 import math
@@ -350,15 +351,25 @@ class ImageProcessor(object):
     def wait_for_all_of(self, images, timeout=15, zone=None):
         pass
     
-    def resize_image(self, resize_percent, origFile):
-        img = Image.open(origFile)
-        resize_percent = int(resize_percent) * 10
-        wpercent = (int(resize_percent) / float(img.size[0]))
-        hsize = int((float(img.size[1]) * float(wpercent)))
-        img = img.resize((int(resize_percent), hsize), Image.ANTIALIAS)
-        img.save('resized.png')
-        
-        return img
+    def resize_image(self, resize_percent, filename, output_filename='resized.png'):
+        """
+        Loads an image from ``filename``, resizes it by ``resize_percent`` and returns the resized image.
+        If ``output_filename`` is not None, the resized image will also be saved to file (default ``resized.png``).
+
+        Percentage is relative to original size, for example 50 is half, 100 equal and 200 double size.
+
+        Percentage must be greater than zero.
+        """
+        with Image.open(filename) as input_image:
+            if resize_percent <= 0:
+                raise ValueError('resize_percent must be greater zero')
+            old_width, old_height = input_image.size
+            new_width = int(old_width * resize_percent / 100)
+            new_height = int(old_height * resize_percent / 100)
+            output_image = input_image.resize((new_width, new_height), Image.ANTIALIAS)
+            if output_filename:
+                output_image.save(output_filename)
+        return output_image
 
     def get_image_to_recognize(self, zone, resize_percent, contrast, invert, brightness, change_mode, win_area, cache):
         
