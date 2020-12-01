@@ -5,21 +5,21 @@ class CanNotOpenImageException(Exception):
         self.image_name = image_name
 
     def __str__(self):
-        return 'Image file "%s" was not found' % self.image_name
+        return f'Image file "{self.image_name}" was not found'
 
 class ImageNotFoundException(Exception):
     def __init__(self, image_name):
         self.image_name = image_name
 
     def __str__(self):
-        return 'Reference image "%s" was not found on screen' % self.image_name
+        return f'Reference image "{self.image_name}" was not found on screen'
 
 class ImageFoundButShouldNotBe(Exception):
     def __init__(self, image_name):
         self.image_name = image_name
 
     def __str__(self):
-        return 'Reference image "%s" was found on screen' % self.image_name
+        return f'Reference image "{self.image_name}" was found on screen'
 
 class MatrixError(Exception):
     def __init__(self, matrix):
@@ -27,14 +27,14 @@ class MatrixError(Exception):
 
     def __str__(self):
         #todo: +1 to all symbols before return
-        return 'Something wrong with matrix:\n%s' % str(self.matrix)
+        return f'Something wrong with matrix:\n{str(self.matrix)}'
 
 class ConfigError(Exception):
     def __init__(self, message):
         self.msg = message
 
     def __str__(self):
-        return 'Configuration file corrupted: %s' % self.msg
+        return f'Configuration file corrupted: {self.msg}'
 
 class UnsupportedImageError(Exception):
     def __str__(self):
@@ -47,14 +47,14 @@ class UnknownWindowElementError(Exception):
         self.window = window if window is not None else "main"
 
     def __str__(self):
-        return 'Not found %s %s in %s window' % (self.type, self.element, self.window)
+        return f'Not found {self.type} {self.element} in {self.window} window'
 
 class WindowNotFoundError(Exception):
     def __init__(self, window):
         self.window = window
 
     def __str__(self):
-        return 'Window %s not found in list of initiaized windows' % self.window
+        return f'Window {self.window} not found in list of initialized windows'
 
 class CacheError(Exception):
     def __str__(self):
@@ -65,4 +65,4 @@ class InitError(Exception):
         self.msg = message
 
     def __str__(self):
-        return 'Init SlotBot failed: %s' % self.msg
+        return f'Init ImageLibrary failed: {self.msg}'

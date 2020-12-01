@@ -1,265 +1,213 @@
-from __future__ import absolute_import
+from __future__ import division
 
 import os
 import re
-
-from ImageLibrary import utils
-from ImageLibrary.GUIProcess import GUIProcess
-from ImageLibrary.error_handler import ErrorHandler
-from ImageLibrary.image_processor import ImageProcessor
-from ImageLibrary.open_cv import MatchObjects
 from PIL import Image
 from pytesseract import image_to_string
+
+from ImageLibrary.image_processor import ImageProcessor
+from ImageLibrary.screenshot_operations import ScreenshotOperations
+from ImageLibrary.error_handler import ErrorHandler
+from ImageLibrary import utils
+from ImageLibrary.open_cv import MatchObjects
+
+from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 from robot.api import logger as LOGGER
+from ImageLibrary.GUIProcess import GUIProcess
 
-def resize_img(img, resize):
-    resize = int(resize) * 10
 
-    wpercent = (int(resize) / float(img.size[0]))
-    hsize = int((float(img.size[1]) * float(wpercent)))
-    img = img.resize((int(resize), hsize), Image.ANTIALIAS)
-    img.save('resized.png')
-    
+def resize_after(img, resize):
+    """"Stretches the initial image
+                PIL.IMAGE filters:
+                ANTIALIAS
+                NEAREST
+                BICUBIC
+                BIL
+                INEAR
+    """
+    """
+    Loads an image from ``filename``, resizes it by ``resize_percent`` and returns the resized image.
+    The resized image will is saved by default ``resized.png``.
+    Percentage is relative to original size, for example 5 is half, 10 equal and 20 double size.
+    Percentage must be greater than zero.
+    """
+
+    if resize > 0:
+        origFile = ImageProcessor()._make_up_filename()
+        img.save(origFile)
+        origresize = Image.open(origFile)
+        old_width, old_height = origresize.size
+        new_width = int(old_width * resize)
+        new_height = int(old_height * resize)
+        img = img.resize((new_width, new_height), Image.ANTIALIAS)
+        img.save('resized.png')
     return img
 
 
-class Zone(object):
-    def __init__(self, screenshot_folder, error_handler):
-        self.screenshot_folder = screenshot_folder
-        self.error_handler = error_handler
-        self.cache = False
-    
+class Zone:
+    def __init__(self, name, config):
+        self.name = name
+        self.area = None
+        if isinstance(config, dict):
+            self.position = tuple(config["position"])
+            self.count = config["count"]
+            #todo: padding and direction
+            #by default padding = 0 and direction is horizontal
+        elif isinstance(config, list) and len(config) == 4:
+            self.area = tuple(config)
+        else:
+            raise RuntimeError("Zone {} configured wrong, [x, y, w, h] expected".format(name))
+
+    @utils.add_error_info
+    def get_area(self, index=None):
+        if self.area is not None:
+            return self.area
+        else:
+            assert index is not None, "Zone with subzones must be accessed by index"
+            sz_height = self.position[3]
+            sz_width = self.position[2] / self.count
+
+            sz_left = self.position[0] + (int(index)-1)*sz_width
+            sz_top = self.position[1]
+            
+            return tuple([sz_left, sz_top, sz_width, sz_height])
+        
+        
     '''Returns integers'''
-    
     @utils.add_error_info
-    def get_number_from_zone(self, zone=None, lang=None, resize_percent=0, resize=0, contrast=0,
-                             background=None, invert=False, brightness=0, change_mode=True, tessdata_dir=None,
-                             cache=False):
-        """Returns an integer from the given zone. NB! If zone is not provided the whole acctive window is taken.
+    def get_number_from_zone(self, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
+        img = ImageProcessor().get_image_to_recognize(self.get_area(), cache, resize_percent, contrast, contour, invert, brightness, change_mode)
 
-            Examples:
-            | Get Number From Zone | zone=[x  y  w  h] | lang=eng | resize_percent=15 | resize=0.95 | contrast=0.1 | background=${None} | invert=${False} |
-            brightness=0 | change_mode=${True}
-
-            *resize_percent* - changes the screeshot size right after it is taken\n
-
-            vs *resize* - changes the screenshot size after all other operations with screenshot (contrast, invert, etc)\n
-
-            *contrast* - changes the contrast of the screeshot\n
-            *background* - provide the pattern image of the same size, as the keyword zone. As param value pass the pattern location\n
-            the common parts of two images will be removed returning the difference image.\n
-            *invert* - inverts the colors (mind that it inverts the black-white image; if you want to keep the original colors, use with \n
-            change_mode=${False} param).
-            *change_mode* - by default is ${True}, changes to black-white format. If you need to keep the original - pass ${False)
-
-
-        """
-        
-        self.window_area = GUIProcess().get_window_area()
-        
-        if background is not None:
-            img = ImageProcessor(self.error_handler, self.screenshot_folder).get_image_to_recognize_with_background(
-                zone, resize_percent, contrast, background, brightness, invert, cache)
-        else:
-            img = ImageProcessor(self.error_handler, self.screenshot_folder).get_image_to_recognize(zone,
-                                                                                                    resize_percent,
-                                                                                                    contrast, invert,
-                                                                                                    brightness,
-                                                                                                    change_mode,
-                                                                                                    self.window_area,
-                                                                                                    cache)
-        
+        resize = int(resize)
         if int(resize) > 0:
             resize = int(resize)
-            img = resize_img(img, resize)
+            img = resize_after(img, resize)
             
         config = ""
-        if lang:
-            mydir = os.path.abspath(os.path.dirname(__file__))
-            resdir = os.path.abspath(os.path.join(os.sep, mydir, tessdata_dir))
-            config += ("--tessdata-dir %s -l %s " % (resdir, lang)).replace("\\", "//")
         config += "-psm 8 -c tessedit_char_whitelist=0123456789"
-        
-        txt = image_to_string(img, config=config)
-        
+
         try:
-            return int(txt)
+            return int(image_to_string(img, config=config))
         except ValueError as e:
             msg = "Error while parsing number: " + str(e)
-            ErrorHandler(self.screenshot_folder).report_error(msg, ("img", img))
+            ErrorHandler().report_error(msg, ("img", img))
             raise
-    
+
     '''Returns float numbers'''
-    
     @utils.add_error_info
-    def get_float_number_from_zone(self, zone=None, lang=None, resize_percent=0, resize=0, contrast=0, background=None,
-                                   invert=False, brightness=0, change_mode=True, tessdata_dir=None, cache=False):
-        """Returns the *float*. For details check `Get Number From Zone`
-            Examples:
-            | Get Float Number From Zone | zone=[x  y  w  h] | lang=eng | resize_percent=15 | resize=0.95 | contrast=0.1 | background=${None} | invert=${False} |
-            brightness=0 | change_mode=${True}
-        """
-        
-        self.window_area = GUIProcess().get_window_area()
-        
-        if background is not None:
-            img = ImageProcessor(self.error_handler, self.screenshot_folder).get_image_to_recognize_with_background(
-                zone, resize_percent, contrast, background, brightness, invert, cache)
-        else:
-            img = ImageProcessor(self.error_handler, self.screenshot_folder).get_image_to_recognize(zone,
-                                                                                                resize_percent,
-                                                                                                contrast, invert,
-                                                                                                brightness, change_mode,
-                                                                                                self.window_area, cache)
-        
-        if int(resize) > 0:
-            resize = int(resize)
-            img = resize_img(img, resize)
+    def get_float_number_from_zone(self, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
+        img = ImageProcessor().get_image_to_recognize(self.get_area(), cache, resize_percent, contrast, contour, invert, brightness, change_mode)
+        resize = int(resize)
+        if resize > 0:
+            img = resize_after(img, resize)
             
         config = ""
-        if lang:
-            mydir = os.path.abspath(os.path.dirname(__file__))
-            resdir = os.path.abspath(os.path.join(os.sep, mydir, tessdata_dir))
-            config += ("--tessdata-dir %s -l %s " % (resdir, lang)).replace("\\", "//")
         config += "-psm 8 -c tessedit_char_whitelist=.,0123456789"
-        
-        txt = image_to_string(img, config=config)
-        txt = float(txt)
+
         try:
-            return txt
+            return float(image_to_string(img, config=config))
         except ValueError as e:
             msg = "Error while parsing number: " + str(e)
-            ErrorHandler(self.screenshot_folder).report_error(msg, ("img", img))
+            ErrorHandler().report_error(msg, ("img", img))
             raise
-    
+
     @utils.add_error_info
-    def get_number_with_text_from_zone(self, zone=None, lang=None, resize_percent=0, resize=0, contrast=0,
-                                       background=None, invert=False, brightness=0, change_mode=True, tessdata_dir=None,
-                                       cache=False):
-        """Returns only number from zone with text and number. For arguments details check `Get Number From Zone`
-            Examples:
-            | Get Number With Text From Zone | zone=[x  y  w  h] | lang=eng | resize_percent=15 | resize=0.95 | contrast=0.1 | background=${None} | invert=${False} |
-            brightness=0 | change_mode=${True}
-        """
-        
-        self.window_area = GUIProcess().get_window_area()
-        
-        if background is not None:
-            img = ImageProcessor(self.error_handler, self.screenshot_folder).get_image_to_recognize_with_background(
-                zone, resize_percent, contrast, background, invert, brightness, cache)
-        else:
-            img = ImageProcessor(self.error_handler, self.screenshot_folder).get_image_to_recognize(zone,
-                                                                                                    resize_percent,
-                                                                                                    contrast, invert,
-                                                                                                    brightness,
-                                                                                                    change_mode,
-                                                                                                    self.window_area,
-                                                                                                    cache)
-        
-        if int(resize) > 0:
-            resize = int(resize)
-            img = resize_img(img, resize)
+    def get_number_with_text_from_zone(self, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
+        img = ImageProcessor().get_image_to_recognize(self.get_area(), cache, resize_percent, contrast, contour, invert, brightness, change_mode)
+        resize = int(resize)
+        if resize > 0:
+            img = resize_after(img, resize)
         
         config = ""
-        if lang:
-            mydir = os.path.abspath(os.path.dirname(__file__))
-            resdir = os.path.abspath(os.path.join(os.sep, mydir, tessdata_dir))
-            config += ("--tessdata-dir %s -l %s " % (resdir, lang)).replace("\\", "//")
         config += "-psm 6"
-        
+    
         txt = image_to_string(img, config=config)
         
-        num = re.compile('[0-9|.0-9]+')
+        num = re.compile('[0-9]')
         num = num.findall(txt)
         num = ''.join(num)
+        num = int(num)
         
         try:
-            return float(num)
+            return num
         except ValueError as e:
             msg = "Error while parsing text:" + str(e)
-            ErrorHandler(self.screenshot_folder).report_error(msg, ("img", img))
+            ErrorHandler().report_error(msg, ("img", img))
             raise
-    
-    @utils.add_error_info
-    def get_text_from_zone(self, zone=None, lang=None, resize_percent=0, resize=0, contrast=0, invert=False, background=None,
-                           brightness=0, change_mode=True, tessdata_dir=None, cache=False):
-        """Returns text from zone with text. For arguments details check `Get Number From Zone`
-            Examples:
-            | Get Number With Text From Zone | zone=[x  y  w  h] | lang=eng | resize_percent=15 | resize=0.95 | contrast=0.1 | background=${None} | invert=${False} |
-            brightness=0 | change_mode=${True}
-        """
-        
-        self.window_area = GUIProcess().get_window_area()
 
-        if background is not None:
-            img = ImageProcessor(self.error_handler, self.screenshot_folder).get_image_to_recognize_with_background(
-                zone, cache, resize_percent, contrast, background, invert, brightness)
-        else:
-            img = ImageProcessor(self.error_handler, self.screenshot_folder).get_image_to_recognize(zone,
-                                                                                                resize_percent,
-                                                                                                contrast, invert,
-                                                                                                brightness, change_mode,
-                                                                                                self.window_area, cache)
+    @utils.add_error_info
+    def get_text_from_zone(self, lang=None, resize_percent=0, resize=0, contrast=0, cache=False,
+                                       contour=False, invert=False, brightness=0, change_mode=True, tessdata_dir=None):
+
+        img = ImageProcessor().get_image_to_recognize(self.get_area(), cache, resize_percent, contrast, contour, invert, brightness, change_mode)
+
+        resize = int(resize)
         if int(resize) > 0:
             resize = int(resize)
-            img = resize_img(img, resize)
-            
+            img = resize_after(img, resize)
+
         config = ""
-        if lang:
-            mydir = os.path.abspath(os.path.dirname(__file__))
-            resdir = os.path.abspath(os.path.join(os.sep, mydir, tessdata_dir))
-            config += ("--tessdata-dir %s -l %s " % (resdir, lang)).replace("\\", "//")
         config += "-psm 6"
-        
-        txt = image_to_string(img, config=config)
-        
+
         try:
-            return txt
+            return image_to_string(img, config=config)
         except ValueError as e:
-            msg = "Error while parsing text:" + str(e)
-            ErrorHandler(self.screenshot_folder).report_error(msg, ("img", img))
+            msg = "Error while parsing number: " + str(e)
+            ErrorHandler().report_error(msg, ("img", img))
             raise
-    
-    @utils.add_error_info
-    def get_image_from_zone(self, zone=None):
-        """Returns the image from zone. Saves image to the screenshot folder as image_from_zone.png.
-            Examples:
-            | Get Number With Text From Zone | zone=[x  y  w  h]
 
-        """
-        
-        if zone is None:
-            raise Exception('Search zone should be passed as argument.')
+    @utils.add_error_info
+    def get_image_from_zone(self, zone, image_name):
+        """Returns image from given zone and saves it to 'output' under the provided image_name or default"""
+        screen = self.get_area(zone)
+        scr = ImageProcessor()._get_screenshot(screen)
+        if image_name is not None:
+            screen_name = image_name
         else:
-            scr = ImageProcessor(self.error_handler, self.screenshot_folder)._screenshot(zone)
-            try:
-                if not os.path.exists(self.screenshot_folder):
-                    os.makedirs(self.screenshot_folder)
-                result = os.path.join(self.screenshot_folder, 'image_from_zone.png')
-                scr.save(result)
-                return result
-            except:
-                LOGGER.warn('Could not get screenshot folder dir')
+            screen_name = 'image_from_zone'
+
+        try:
+            output = BuiltIn().get_variable_value('${OUTPUT_DIR}')
+        except RobotNotRunningError:
+            LOGGER.info('Could not get output dir, using default - output')
+            output = os.path.join(os.getcwd(), 'output')
+
+        scr.save(output+ '\\' + screen_name + '.png')
+
+        return output + '\\' + screen_name + '.png'
     
-    @utils.add_error_info
-    def get_template_position(self, template, threshold=0.99):
-        """Returns template's coordinates after search. You can also specify the threshold value.
-            Examples:
-            | Get Template Position | template=img.png | threshold=${None}
-        """
-        
-        threshold = float(threshold)
-        screen = ImageProcessor(self.error_handler, self.screenshot_folder)._screenshot()
-        return MatchObjects().match_and_return_coordinates(template, screen, threshold)
-    
-    @utils.add_error_info
-    def save_zone_content_to_output(self, zone):
-        '''FOR DEBUG: saves the content (screenshot) of the provided zone. Pass zone. Image is saved in the output folder in
-                      current dir.
-        '''
-        
-        screen_img = ImageProcessor(self.error_handler, self.screenshot_folder)._screenshot(zone)
-        ErrorHandler(self.screenshot_folder).save_pictures([(screen_img, "zone")])
+    # @utils.add_error_info
+    # def is_template_in_zone(self, template, zone, invert=False):
+    #     """Pass template as image to be found on screen in the given zone.
+    #     Takes a screenshot of the passed area and find given data on the screenshot.
+    #     Returns results for each argument."""
+    #
+    #     area = self.get_area(zone)
+    #     screen = ImageProcessor()._get_screenshot(area)
+    #
+    #     if invert:
+    #         screen = ScreenshotOperations().invert_image(screen)
+    #
+    #     screen.save('scr.png')
+    #
+    #     print(MatchObjects().match_objects_with_knn(screen, template))
+    #
+    #     return MatchObjects().match_objects_with_knn(screen, template)
+    #
+    # @utils.add_error_info
+    # def match_template_in_zone(self, template, zone, invert=False):
+    #     area = self.get_area(zone)
+    #     screen = ImageProcessor()._get_screenshot(area)
+    #
+    #     if invert:
+    #         screen = ScreenshotOperations().invert_image(screen)
+    #
+    #     return MatchObjects().match_objects(template, screen)
 
-
-
+    # @utils.add_error_info
+    # def get_template_position(self, template, zone, threshold=None):
+    #     """The same as is_template_in_zone, but returns templates positions after search"""
+    #     cache = ImageProcessor().take_cache_screenshot()
+    #     screen = ImageProcessor()._get_screen(zone, cache)
+    #
+    #     return MatchObjects().match_and_return_coordinates(template, screen, threshold)
