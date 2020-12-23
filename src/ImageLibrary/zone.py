@@ -78,7 +78,7 @@ class Zone(object):
             mydir = os.path.abspath(os.path.dirname(__file__))
             resdir = os.path.abspath(os.path.join(os.sep, mydir, tessdata_dir))
             config += ("--tessdata-dir %s -l %s " % (resdir, lang)).replace("\\", "//")
-        config += "-psm 8 -c tessedit_char_whitelist=0123456789"
+        config += "--psm 8 -c tessedit_char_whitelist=0123456789"
         
         txt = image_to_string(img, config=config)
         
@@ -121,7 +121,7 @@ class Zone(object):
             mydir = os.path.abspath(os.path.dirname(__file__))
             resdir = os.path.abspath(os.path.join(os.sep, mydir, tessdata_dir))
             config += ("--tessdata-dir %s -l %s " % (resdir, lang)).replace("\\", "//")
-        config += "-psm 8 -c tessedit_char_whitelist=.,0123456789"
+        config += "--psm 8 -c tessedit_char_whitelist=.,0123456789"
         
         txt = image_to_string(img, config=config)
         txt = float(txt)
@@ -165,7 +165,7 @@ class Zone(object):
             mydir = os.path.abspath(os.path.dirname(__file__))
             resdir = os.path.abspath(os.path.join(os.sep, mydir, tessdata_dir))
             config += ("--tessdata-dir %s -l %s " % (resdir, lang)).replace("\\", "//")
-        config += "-psm 6"
+        config += "--psm 6"
         
         txt = image_to_string(img, config=config)
         
@@ -209,7 +209,7 @@ class Zone(object):
             mydir = os.path.abspath(os.path.dirname(__file__))
             resdir = os.path.abspath(os.path.join(os.sep, mydir, tessdata_dir))
             config += ("--tessdata-dir %s -l %s " % (resdir, lang)).replace("\\", "//")
-        config += "-psm 6"
+        config += "--psm 6"
         
         txt = image_to_string(img, config=config)
         
