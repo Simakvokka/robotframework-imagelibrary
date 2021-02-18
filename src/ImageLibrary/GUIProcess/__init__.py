@@ -1,20 +1,12 @@
-# -*- coding: utf-8 -*-
-
-import os
 import time
-import re
-
 import pyautogui as ag
-from pytesseract import image_to_string
 from robot.api import logger as LOGGER
 from robot.libraries import Process
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 from PIL import Image
 import pyautogui
-import datetime
 import os
 from ImageLibrary.errors import CanNotOpenImageException, ImageNotFoundException
-from ImageLibrary import utils
 from ImageLibrary.image_processor import FindResult
 from ImageLibrary.open_cv import OpenCV
 from ImageLibrary.libcore.robotlibcore import keyword
@@ -68,7 +60,7 @@ class GUIProcess(Process.Process):
 
     def _save_to_disk(self, img, name):
         """Saves the screenshots taken in the process of tests executions to the
-            'output' folder in the executing directory (in our case directory with launcher)."""
+            'output' folder in the executing directory."""
 
         screenshot_folder = os.path.join(os.getcwd(), 'output')
         try:
@@ -92,7 +84,7 @@ class GUIProcess(Process.Process):
         self._screenshot_counter += 1
 
         return os.path.join(output,
-                    "guiproc-screenshot-%d.png" % (self._screenshot_counter))
+                    "guiproc-screenshot-{}.png".format(self._screenshot_counter))
 
     def _locate(self, reference_image, threshold):
         """Tries to locate the given image with threshold on screen.
@@ -135,38 +127,44 @@ class GUIProcess(Process.Process):
 
         return handle
     
-    @keyword
-    def activate_gui_process(self, handle):
-        if not self.is_process_running(handle):
-            raise RuntimeError(f"No program running with handle='{handle}'")
+    #@keyword
+    #todo: keyword might be useless
+    # def activate_gui_process(self, handle):
+    #     if not self.is_process_running(handle):
+    #         raise RuntimeError(f"No program running with handle='{handle}'")
+    #
+    #     proc = self.get_process_object(handle)
+    #     if not proc:
+    #         raise RuntimeError(f"No program found by handle='{handle}'")
+    #
+    #     if not hasattr(proc, 'wnd') or not proc.wnd:
+    #         raise RuntimeError(f"Program with handle '{handle}' have no window!")
+    #
+    #     _gui.set_active_window(proc.wnd)
 
-        proc = self.get_process_object(handle)
-        if not proc:
-            raise RuntimeError(f"No program found by handle='{handle}'")
-
-        if not hasattr(proc, 'wnd') or not proc.wnd:
-            raise RuntimeError(f"Program with handle '{handle}' have no window!")
-
-        _gui.set_active_window(proc.wnd)
-
-    def _get_screenshot(self, x, y, w, h, resize_percent=0):
-        wnd = _gui.get_active_window()
-        rc = _gui.get_window_client_rect(wnd)
-        img = ag.screenshot(region=(rc[0] + int(x), rc[1] + int(y), int(w), int(h)))
-
-        imgFile = self._make_up_filename()
-        img.save(imgFile)
-
-        imgresize = Image.open(imgFile)
-        width, height = imgresize.size
-        width_resize = width * int(resize_percent) / width + width
-        height_resize = height * int(resize_percent) / height + height
-        imgresize = imgresize.resize((int(round(width_resize)), int(round(height_resize))), Image.ANTIALIAS)
-        imgresize.save(imgFile)
-
-        LOGGER.info('Screenshot taken: {0}<br/><img src="{0}" '
-                    'width="100%" />'.format(imgFile), html=True)
-        return imgresize
+    # def _get_screenshot(self, x, y, w, h, resize_percent=0):
+    #     wnd = _gui.get_active_window()
+    #     rc = _gui.get_window_client_rect(wnd)
+    #     img = ag.screenshot(region=(rc[0] + int(x), rc[1] + int(y), int(w), int(h)))
+    #
+    #     imgFile = self._make_up_filename()
+    #     img.save(imgFile)
+    #
+    #     imgresize = Image.open(imgFile)
+    #     width, height = imgresize.size
+    #     width_resize = width * int(resize_percent) / width + width
+    #     height_resize = height * int(resize_percent) / height + height
+    #     imgresize = imgresize.resize((int(round(width_resize)), int(round(height_resize))), Image.ANTIALIAS)
+    #     imgresize.save(imgFile)
+    #
+    #     LOGGER.info('Screenshot taken: {0}<br/><img src="{0}" '
+    #                 'width="100%" />'.format(imgFile), html=True)
+    #     return imgresize
+    
+    
+    def _get_window(self):
+        wnd = _gui.get_window()
+        return _gui.get_window_client_rect(wnd)
 
     @keyword
     def get_window_area(self):
@@ -282,32 +280,3 @@ class GUIProcess(Process.Process):
         LOGGER.info(f'Clicking image {reference_image} in position {center_location}')
         ag.click(center_location)
         return center_location
-    
-    @keyword
-    def wait_for(self, image, timeout=15, threshold=0.98):
-        """Waits for image to appear on screen for the given timeout.
-        Fails if not found.
-        :param
-        image: path to image location
-        threshold: the accuracy
-        timeout: time in seconds to wait for image"""
-
-        timeout = float(timeout)
-        start_time = datetime.datetime.now()
-        rect = self.get_window_area()
-        img = self._load_image(image)
-
-        while True:
-            screen_img = pyautogui.screenshot(region=rect)
-            result = self._find_image_result(img, screen_img, threshold)
-            if result.found:
-                return True
-            utils.sleep(0)
-            if (datetime.datetime.now() - start_time).seconds > timeout:
-                break
-
-        image_info = ("image", result.image)
-        screen_info = ("screen", result.screen)
-        msg = "Waiting for image was unsuccessful for threshold {}".format(threshold)
-        self._report_message(msg, image_info, screen_info)
-        raise ImageNotFoundException(image)

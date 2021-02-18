@@ -23,14 +23,14 @@ class DynamicButton(StatedButton):
 
     def _is_on_screen(self):
         """any state"""
-        screen = ImageProcessor().get_screenshot()
+        screen = ImageProcessor()._get_screenshot()
         images_to_find = self.states.values()
         coords = ImageProcessor().find_one_of(images_to_find, screen=screen)
         return coords is not None
 
     @utils.add_error_info
     def _get_coordinates(self):
-        screen = ImageProcessor().get_screenshot()
+        screen = ImageProcessor()._get_screenshot()
         images_to_find = self.states.values()
         coords = ImageProcessor().find_one_of(images_to_find, screen=screen)
         if coords is not None:
@@ -76,7 +76,7 @@ class DynamicButtonList(Button):
     """
     def __init__(self, name, config):
         super(DynamicButtonList, self).__init__(name)
-        assert isinstance(config, list), "config for list of static buttons is not a list o_O"
+        assert isinstance(config, list), "config for list of static buttons is not a list 0_O"
         self.buttons = []
         for button in config:
             self.buttons.append(DynamicButton(name, button))
@@ -84,6 +84,7 @@ class DynamicButtonList(Button):
     def _get_button_by_index(self, index):
         index = int(index)
         assert index != -1, "Button must be reached by index"
+        # to start from 1 index. Old in case not to mix with programming languages logic where indexing starts from 0
         #assert index > 0, "Index must be more, than zero"
         assert index <= len(self.buttons), "Index is beyond the borders"
         return self.buttons[index-1]

@@ -52,7 +52,7 @@ class GlobalButtonRegistry(metaclass=Singleton):
         self.merge_errors = []
 
     def _parse_config(self, config):
-        assert isinstance(config, dict), "Button defs must contain dict of buttons"
+        assert isinstance(config, dict), "Button definitions must contain dict of buttons"
         buttons = {}
         for button_name, button_config in sorted(config.items()):
             buttons[button_name] = GlobalButtonDef(button_name, button_config)
@@ -69,7 +69,7 @@ class GlobalButtonRegistry(metaclass=Singleton):
 
     def report_merge_errors(self):
         if self.merge_errors:
-            ErrorHandler().report_error("Errors occured while parsing configs:\n" + "\n".join(self.merge_errors))
+            ErrorHandler().report_error("Errors occurred while parsing configs:\n" + "\n".join(self.merge_errors))
             raise AssertionError("Config is malformed")
 
     def get_button_info(self, name):
@@ -151,7 +151,7 @@ class GlobalStaticButton(StatedButton):
             assert len(config.keys()) == 1, LOGGER.error("Config malformed for button {}".format(self.name))
             self.global_name = list(config.keys())[0]
             possible_states = get_possible_states(list(config.values())[0])
-
+            #todo:check
             #assert "name" in config, "Button name must be set"
             #self.global_name = config["name"]
             #
@@ -176,7 +176,6 @@ class GlobalStaticButton(StatedButton):
         self.coords = find_on_screen(self.states, screen)
         if self.coords is not None:
             return
-        #self.coords = find_on_screen(self.states, screen)
 
     @utils.add_error_info
     def _get_coordinates(self):
@@ -190,7 +189,7 @@ class GlobalStaticButtonList(Button):
     """
     def __init__(self, name, config):
         super(GlobalStaticButtonList, self).__init__(name)
-        assert isinstance(config, list), "config for list of static buttons is not a list o_O"
+        assert isinstance(config, list), "config for list of static buttons is not a list 0_O"
         self.buttons = []
         for button in config:
             self.buttons.append(GlobalStaticButton(name, button))
@@ -205,6 +204,7 @@ class GlobalStaticButtonList(Button):
     def _get_button_by_index(self, index):
         index = int(index)
         assert index != -1, "Button must be reached by index"
+        # to start from 1 index. Old in case not to mix with programming languages logic where indexing starts from 0
         #assert index > 0, "Index must be more, than zero"
         assert index <= len(self.buttons), "Index is beyond the borders"
         return self.buttons[index-1]
@@ -235,5 +235,6 @@ class GlobalStaticButtonList(Button):
 
 
 class GlobalDynamicButton(StatedButton):
+    #todo
     pass
 

@@ -75,6 +75,7 @@ class StaticButtonList(Button):
     def _get_button_by_index(self, index):
         index = int(index)
         assert index != -1, "Button must be reached by index"
+        # to start from 1 index. Old in case not to mix with programming languages logic where indexing starts from 0
         #assert index > 0, "Index must be more, than zero"
         assert index <= len(self.buttons), "Index is beyond the borders"
         return self.buttons[index-1]

@@ -83,7 +83,7 @@ class ButtonConstructor:
         elif type == MULTI_BUTTON_COORD_LABEL:
             for button_name, button_config in sorted(config.items()):
                 buttons[button_name] = MultiButtonCoord(button_name, button_config)
-        
+                #todo: check
                 # for button_name, button_config in config.iteritems():
             #     if isinstance(button_config, list):
             #         buttons[button_name] = ButtonCoordMulti(button_name, button_config)

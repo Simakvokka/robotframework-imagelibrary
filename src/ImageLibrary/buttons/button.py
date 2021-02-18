@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-
 import pyautogui
 from ImageLibrary.error_handler import ErrorHandler
 from ImageLibrary.image_processor import ImageProcessor, DEFAULT_THRESHOLD
-from ImageLibrary.game_window_function import game_window_function
 from ImageLibrary import utils
 
 STATE_NORMAL = "normal"
@@ -59,7 +56,7 @@ def find_on_screen(states, screen=None):
     #creates the Class object - image_processor
     image_processor = ImageProcessor()
     #checks if screen is provided, else gets the active window screenshot
-    screen = screen if screen is not None else image_processor.get_screenshot()
+    screen = screen if screen is not None else image_processor._get_screenshot()
     #collects images
     images_to_find = states.values()
     #searches for image in state on screen
@@ -68,7 +65,7 @@ def find_on_screen(states, screen=None):
     if coords is not None:
         return coords.get_pos()
     #try again if not found in first attempt
-    ErrorHandler().report_warning("First try was unsuccesful")
+    ErrorHandler().report_warning("First try was unsuccessful")
     utils.sleep(0.020)
     coords = image_processor.find_one_of(images_to_find)
     if coords is not None:
@@ -147,9 +144,8 @@ class StatedButton(Button):
 
     @utils.add_error_info
     def get_button_state(self, index):
-        screen = ImageProcessor().get_screenshot()
+        screen = ImageProcessor()._get_screenshot()
         images_to_find = self.states.values()
-        print('states', self.states.values())
         coords = ImageProcessor().find_one_of(images_to_find, screen=screen)
         if coords is not None:
             for state_name, state_info in self.states:

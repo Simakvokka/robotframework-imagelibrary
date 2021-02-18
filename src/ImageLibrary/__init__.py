@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import os.path
@@ -7,7 +6,6 @@ import pyautogui
 
 from ImageLibrary.image_processor import ImageProcessor
 from ImageLibrary.keywords import Keywords
-
 from ImageLibrary.libcore.robotlibcore import DynamicCore
 from ImageLibrary.libcore.robotlibcore import keyword
 
@@ -16,10 +14,12 @@ __version__ = '1.0.0'
 
 
 class ImageLibrary(DynamicCore):
-    """ImageLibrary library provides methods to work with game windows and screenshots.
+    """ImageLibrary library provides methods to work with active windows and screenshots.
         Mostly all the keywords related work with images.
 
         Add library to RobotFramework tests:
+        
+        args: screenshot_folder (optional)
 
         Examples:
 		|   Librariy        ImageLibrary    screenshot_folder=${EXECDIR}${/}output
@@ -29,19 +29,21 @@ class ImageLibrary(DynamicCore):
 
     ####    INIT    ####
     def __init__(self, screenshot_folder=None):
-
         self.screenshot_folder = screenshot_folder
-        # main game window
+        # main window
         self.screenshot_counter = 0
 
-        self.libraries = [Keywords(self.screenshot_folder, self)]
+        self.libraries = [Keywords(screenshot_folder, self)]
         DynamicCore.__init__(self, self.libraries)
 
-    #Copied From ImageHorizonLibrary
     @keyword
     def take_screenshot(self):
-        self.screenshot_folder = os.path.join(os.getcwd(), 'output')
-
+        if self.screenshot_folder is None:
+            self.screenshot_folder = os.path.join(os.getcwd())
+        else:
+            if not os.path.exists(self.screenshot_folder):
+                os.mkdir(self.screenshot_folder)
+                
         screenshot_name = "Screenshot-{}.png".format(self.screenshot_counter)
         self.screenshot_counter += 1
 

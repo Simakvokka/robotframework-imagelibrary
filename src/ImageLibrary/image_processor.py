@@ -81,7 +81,7 @@ class ImageProcessor(metaclass=Singleton):
 
     def _get_screenshot(self, area=None):
         """get_screenshot([area]) -> Image
-            Get screenshot of specified area or whole game window if rect is None
+            Get screenshot of specified area or whole active window if rect is None
             Coordinates are calculating from left-top corner of window
         """
         assert self.rect is not None, "Init window area before use"
@@ -96,7 +96,7 @@ class ImageProcessor(metaclass=Singleton):
     def get_screenshot(self):
         #for external use, without areas
         self.hide_cursor()
-        return pyautogui.screenshot(region=self.rect)
+        return pyautogui.screenshot()
 
     def load_image(self, image):
         """Load image from reference folders"""
@@ -294,7 +294,7 @@ class ImageProcessor(metaclass=Singleton):
         return False
 
     def find_multiple_images(self, image, threshold=0.99, cache=False, zone=None, screen=None):
-        """S.find_image(image, threshold, cache, zone) -> list(FindResult)"""
+        """find_image(image, threshold, cache, zone) -> list(FindResult)"""
 
         threshold = float(threshold)
         cache = utils.to_bool(cache)
@@ -334,7 +334,7 @@ class ImageProcessor(metaclass=Singleton):
         pass
 
     def wait_for_one_of(self, images, timeout=15, zone=None):
-        """S.wait_for_one_of_images(images, timeout, step, zone) -> bool
+        """wait_for_one_of_images(images, timeout, step, zone) -> bool
             images - list of (image, threshold, bool)
                 image - PIL image
                 threshold - threshold for image

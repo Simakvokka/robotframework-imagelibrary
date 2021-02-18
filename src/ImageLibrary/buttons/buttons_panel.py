@@ -31,11 +31,11 @@ class ButtonsPanel(Button):
         elif info["direction"] == "matrix":
             direction = 2
         else:
-            raise errors.ConfigError("Unknown direction, only horizontal and vertical are supported, {} recieved".format(info["direction"]))
+            raise errors.ConfigError("Unknown direction, only horizontal and vertical are supported, {} received".format(info["direction"]))
 
         padding = info["padding"] if "padding" in info else 0
         position = info["position"]
-        assert len(position) == 4, "Position must be in form: [l t w h]"
+        assert len(position) == 4, "Position must be in form: [left top width height]"
 
         if direction == 2:
             assert "rows" in info and "columns" in info, "Both rows and columns must be in config when direction is matrix"
@@ -73,6 +73,7 @@ class ButtonsPanel(Button):
     def press_button(self, index, times):
         index = int(index)
         assert index != -1, "Index is not set".format(self.name)
+        # to start from 1 index. Old in case not to mix with programming languages logic where indexing starts from 0
         #assert index > 0, "Index must by more that zero"
         assert index <= len(self.buttons), "Index must be less then elements count"
         self.click_center(self.buttons[index-1], times)

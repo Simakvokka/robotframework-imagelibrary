@@ -4,16 +4,11 @@ import os
 import re
 from PIL import Image
 from pytesseract import image_to_string
-
 from ImageLibrary.image_processor import ImageProcessor
-from ImageLibrary.screenshot_operations import ScreenshotOperations
 from ImageLibrary.error_handler import ErrorHandler
 from ImageLibrary import utils
-from ImageLibrary.open_cv import MatchObjects
-
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 from robot.api import logger as LOGGER
-from ImageLibrary.GUIProcess import GUIProcess
 
 
 def resize_after(img, resize):
@@ -147,7 +142,7 @@ class Zone:
             img = resize_after(img, resize)
 
         config = ""
-        config += "-psm 6"
+        config += "--psm 6"
 
         try:
             return image_to_string(img, config=config)

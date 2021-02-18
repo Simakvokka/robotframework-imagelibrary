@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-
-#python
-import datetime
-import os
-#ImageLibrary
+import datetime, os
 from ImageLibrary import errors
 from ImageLibrary.buttons.button_constructor import BUTTON_TYPES
 from ImageLibrary.template import Template, ComplexTemplate
@@ -14,12 +9,10 @@ from ImageLibrary.error_handler import ErrorHandler
 from ImageLibrary.animations import Animations
 from ImageLibrary import utils
 from ImageLibrary.compare_img import ImageComparison
-
 from ImageLibrary.libcore.librarycomponent import LibraryComponent
 
-from robot.api import logger as LOGGER
 
-class GameWindow(LibraryComponent):
+class Window(LibraryComponent):
     ####    INIT    ####
     def __init__(self, config, window_name, button_constructor, state, debug=False):
         #super().__init__(state)
@@ -451,7 +444,7 @@ class GameWindow(LibraryComponent):
 
     ####    VALUES      ####
 
-    #@game_window_function
+    #@window_function
     @utils.add_error_info
     def get_value_from_config(self, value, index=None):
         value, index = utils.split_to_name_and_index(value, index)
@@ -459,19 +452,19 @@ class GameWindow(LibraryComponent):
         return self.values[value].get_value_from_config(index)
 
 
-    #@game_window_function
+    #@window_function
     @utils.add_error_info
     def get_last_value_from_config(self, value):
         return self.values[value].get_last_value_from_config()
 
 
-    #@game_window_function
+    #@window_function
     @utils.add_error_info
     def iterate_all_values(self, value, reverse=False):
         return self.values[value].iterate_all_values(reverse)
 
 
-    #@game_window_function
+    #@window_function
     @utils.add_error_info
     def get_values_from_config(self, value):
         return self.values[value].get_values_from_config()
@@ -486,25 +479,18 @@ class GameWindow(LibraryComponent):
         ErrorHandler().save_pictures([(screen_img, "zone")])
 
 
-    # def compare_images(self, id, image, screen, type=None):
-    #     if type is None:
-    #         assert IOError('Product type parameter should be passed as "type" argument: haxe or launcher')
-    #
-    #     dir = os.path.abspath(os.path.dirname(__file__))
-    #     if type == 'haxe':
-    #         imdir = os.path.abspath(os.path.join(os.sep, dir, '..\\..\\launcher\\l_screens\\haxe\\haxe_mobile'))
-    #         image = imdir + '\\' + id + '\\' + image
-    #     if type == 'launcher':
-    #         imdir = os.path.abspath(os.path.join(os.sep, dir, '..\\..\\launcher\\l_screens\\games'))
-    #         image = imdir + '\\' + id + '\\' + image
-    #
-    #     return ImageComparison().return_comparison_result(image, screen)
+    def compare_images(self, image, screen):
+        dir = os.path.abspath(os.path.dirname(__file__))
+        imdir = os.path.abspath(os.path.join(os.sep, dir, image))
+        image = imdir + '\\' + id + '\\' + image
+
+        return ImageComparison().return_comparison_result(image, screen)
 
 
 import unittest
 ##Unittests are deprecated and not working now. Sorry!
 
-class GameWindowTests(unittest.TestCase):
+class WindowTests(unittest.TestCase):
    pass
 
 if __name__ == '__main__':

@@ -30,7 +30,7 @@ class ButtonCoord(Button):
         
 class MultiButtonCoord(Button):
     """For multiple button images which slightly differ from each other and at the same time are difficult to recognize by means of other buttons
-        types. Form all those buttons under one 'button_coord_multi_name' by sets of their coordinates [[ l t w h ], [ l t w h ], [ l t w h ], etc]
+        types. Form all those buttons under one 'button_coord_multi_name' by sets of their coordinates [[ left top width height ], [ left top width height ], [ left top width height ], etc]
     Inherits the Keywords from parent Button class to interact with buttons.
     """
     def __init__(self, name, config):
@@ -41,7 +41,7 @@ class MultiButtonCoord(Button):
         position = info["position"]
         
         for button in position:
-            assert len(button) == 4, "Position must be: [l t w h]"
+            assert len(button) == 4, "Position must be: [left top width height]"
             width = button[2]
             height = button[3]
             x, y = button[:2]
@@ -52,6 +52,7 @@ class MultiButtonCoord(Button):
     def press_button(self, index, times):
         index = int(index)
         assert index != -1, "Index is not set".format(self.name)
+        # to start from 1 index. Old in case not to mix with programming languages logic where indexing starts from 0
         #assert index > 0, "Index must by more that zero"
         assert index <= len(self.buttons), "Index must be less then elements count"
         self.click_center(self.buttons[index-1], times)

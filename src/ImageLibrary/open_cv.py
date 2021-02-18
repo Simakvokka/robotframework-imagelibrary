@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 #tip: SURF AND SIF algorythms are removed from newer opencv releases
 #pip install opencv-contrib-python==3.4.2.16 or use CMake built opencv library
 
