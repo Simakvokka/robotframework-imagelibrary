@@ -80,7 +80,8 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
         self.mw = None
         self.debug = debug
         self.gui_process = GUIProcess()
-    
+
+   
     @keyword
     def init(self, settings_file, reference_folders, area=None):
 
@@ -128,6 +129,8 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
 
         self.settings = {}
         self.button_registry = GlobalButtonRegistry('hack')
+        
+        assert settings_file is not None, "YAML config file must not be empty and must contain 'main' window section with at least one of buttons|templates|zones etc"
 
         if hasattr(settings_file, '__iter__'):
             for setting in settings_file:
@@ -147,11 +150,6 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
             self.button_registry.update_info(config["global_buttons_defs"])
             del config["global_buttons_defs"]
         self.settings.update(config)
-
-        # if self.debug: LOGGER.info('<font size="2"><b>UPDATED YAML CONFIG:</b></font>' + "\n" + "\n".join(
-        #     "<table width='800'><tr><td><i>key</i></td><td><i>values</i></td></tr><tr></tr>"
-        #     "<tr><td><b>{}</b></td><td style='width:1000px text-align:justify'>{}</td></tr></table>".format(k, v)
-        #     for k, v in self.settings.items()), html=True)
 
         self.reference_folders = reference_folders
         _check_config(self.settings, self.reference_folders)
@@ -196,6 +194,7 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
                             "screen {} of window {} not properly configured: dict expected".format(index + 1, name))
 
                     self.windows[name].append(Window(screen, name, self.button_constructor, self.debug))
+
 
     def _get_window(self, window, index=-1):
         if window is not None:
@@ -327,6 +326,7 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
         """Validates the presence of passed image on screen.
             Searches in the provided zone or on the whole active window.
             Returns boolean.
+
         """
         pass
 
@@ -499,6 +499,40 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
             |   Wait For Complex Template To Hide | template=template_name | threshold=0.99 | zone=zone_coordinates
         """
         pass
+
+
+    #todo: requires non public Openc CV version because of surf.cpp. Another way should be inveneted
+    # @keyword
+    # @window_function
+    # def is_template_in_zone(self, template, index=-1, threshold=None, cache=False, zone=None, window=None, wind_index=-1):
+    #     """Checks if the given template is present in the provided zone, using knn algorythms. Returns boolean.
+    #
+    #         Examples:
+    #         |   ${is_on_screen} = | Is Template In Zone | template=templ_name.png | zone=zone_coordinates
+    #     """
+    #     pass
+
+    # @keyword
+    # @window_function
+    # def match_template_in_zone(self, template, zone):
+    #     """Checks if the given template is present in the provided zone. Returns boolean.
+    #
+    #         Examples:
+    #         |   ${is_on_screen} = | Match Template On Screen | template=templ_name | zone=zone_coordinates
+    #     """
+    #     pass
+    #
+    # @keyword
+    # @window_function
+    # def get_template_position(self, template, zone):
+    #     """Returns the found template coordinates from the provided zone.
+    #
+    #         Examples:
+    #         |   ${pos} = | Get Template Position | template=templ_name | zone=zone_coordinates
+    #     """
+    #     pass
+    #
+    
     
     ###    BUTTONS     ####
     @keyword
@@ -699,36 +733,7 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
             name argument is not passed
         """
         pass
-    #todo:
-    # @keyword
-    # @window_function
-    # def is_template_in_zone(self, template, zone):
-    #     """Checks if the given template is present in the provided zone, using knn algorythms. Returns boolean.
-    #
-    #         Examples:
-    #         |   ${is_on_screen} = | Is Template In Zone | template=templ_name.png | zone=zone_coordinates
-    #     """
-    #     pass
-    
-    # @keyword
-    # @window_function
-    # def match_template_in_zone(self, template, zone):
-    #     """Checks if the given template is present in the provided zone. Returns boolean.
-    #
-    #         Examples:
-    #         |   ${is_on_screen} = | Match Template On Screen | template=templ_name | zone=zone_coordinates
-    #     """
-    #     pass
 
-    # @keyword
-    # @window_function
-    # def get_template_position(self, template, zone):
-    #     """Returns the found template coordinates from the provided zone.
-    #
-    #         Examples:
-    #         |   ${pos} = | Get Template Position | template=templ_name | zone=zone_coordinates
-    #     """
-    #     pass
     
     ###    VALUES      ####
     @keyword

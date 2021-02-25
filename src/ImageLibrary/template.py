@@ -28,7 +28,7 @@ class Template:
             #assert index > 0, "Index must by more that zero"
             assert index <= len(self.images), "{} has only {} elements, index is to big".format(self.name, len(self.images))
             return self.images[index - 1]
-
+        print(self.images)
         return self.image
 
     @utils.add_error_info
@@ -71,6 +71,15 @@ class Template:
         image = self._get_template_image(index)
         return ImageProcessor().get_images_count(image[0], _get_threshold(image, threshold), cache, zone)
 
+    @utils.add_error_info
+    def is_template_in_zone(self, index=-1, threshold=None, cache=False, zone=None):
+        """Pass template as image to be found on screen in the given zone.
+        Takes a screenshot of the passed area and find given data on the screenshot.
+        Returns results for each argument."""
+        
+        image = self._get_template_image(index)
+        return ImageProcessor().is_template_in_zone(image[0], zone)
+    
 
 class ComplexTemplate(object):
     def __init__(self, name, config):

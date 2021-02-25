@@ -315,6 +315,28 @@ class Window(LibraryComponent):
     def wait_for_complex_template_to_hide(self, template, threshold=None, timeout=15, zone=None):
         zone = self.zones[zone].get_area() if zone is not None else None
         return self.complex_templates[template].wait_for_complex_template_to_hide(threshold, timeout, zone)
+    
+    
+    # @utils.add_error_info
+    # def is_template_in_zone(self, template, index=-1, threshold=None, cache=False, zone=None):
+    #     template, index = utils.split_to_name_and_index(template, index)
+    #     if zone is not None:
+    #         zone, zindex = utils.split_to_name_and_index(zone, None)
+    #         zone = self.zones[zone].get_area(zindex) if zone is not None else None
+    #     return self.templates[template].is_template_in_zone(index, threshold, cache, zone)
+
+    #
+    # @utils.add_error_info
+    # def match_template_in_zone(self, template, zone):
+    #     area = self.zones[zone].get_area() if zone is not None else None
+    #     return ImageProcessor().is_template_in_zone(template, area)
+    #
+    #
+    # @utils.add_error_info
+    # def get_template_position(self, template, zone):
+    #     area = self.zones[zone].get_area() if zone is not None else None
+    #     return ImageProcessor().get_template_position(template, area)
+
 
     ####    BUTTONS     ####
     @utils.add_error_info
@@ -405,7 +427,7 @@ class Window(LibraryComponent):
 
     @utils.add_error_info
     def get_number_from_zone(self, zone, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
-        return self.zones[zone].get_number_from_zone(lang, resize_percent, resize, contrast, cache, contour, invert, brightness, change_mode)
+         return self.zones[zone].get_number_from_zone(lang, resize_percent, resize, contrast, cache, contour, invert, brightness, change_mode)
 
 
     @utils.add_error_info
@@ -427,20 +449,6 @@ class Window(LibraryComponent):
     def get_image_from_zone(self, zone, image_name=None):
         return self.zones[zone].get_image_from_zone(zone, image_name)
 
-
-    # @utils.add_error_info
-    # def is_template_in_zone(self, template, zone):
-    #     return self.zones[zone].is_template_in_zone(zone, template)
-
-
-    # @utils.add_error_info
-    # def match_template_in_zone(self, template, zone):
-    #     return self.zones[zone].is_template_in_zone(template, zone)
-
-    #
-    # @utils.add_error_info
-    # def get_template_position(self, template, zone):
-    #     return self.zones[zone].get_template_position(template, zone)
 
     ####    VALUES      ####
 

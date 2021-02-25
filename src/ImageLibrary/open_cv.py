@@ -143,7 +143,7 @@ class OpenCV:
         #ret, thresh = cv2.threshold(prep, prep.min() + (prep.max() - prep.min())/2, 255, cv2.THRESH_TRUNC)
         return Image.fromarray(prep).convert('RGB')
 
-class MatchObjects(object):
+class MatchObjects:
     def __init__(self):
         self.found = None
 
@@ -227,8 +227,8 @@ class MatchObjects(object):
     def match_objects_with_knn(self, screen, template, ratio_threshold=0.5):
         """Uses the K-Nearest Neighbours algorithm to find the match on screen.
         """
-
-        img1 = cv2.imread(template, 2)  # what
+        #img1 = cv2.imread(template, 2)  # what
+        img1 = np.array(template)
         img1 = cv2.Canny(img1, 100, 700, apertureSize=3, L2gradient=False)
         img2 = np.asarray(screen)  # where
         img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
@@ -249,6 +249,7 @@ class MatchObjects(object):
         for m, n in knn_matches:
             if m.distance < ratio_thresh * n.distance:
                 good_matches.append(m)
+    
 
         # -- Draw matches
         img_matches = np.empty((max(img1.shape[0], img2.shape[0]), img1.shape[1] + img2.shape[1], 3), dtype=np.uint8)

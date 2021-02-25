@@ -10,7 +10,6 @@ from ImageLibrary import utils
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 from robot.api import logger as LOGGER
 
-
 def resize_after(img, resize):
     """"Stretches the initial image
                 PIL.IMAGE filters:
@@ -170,39 +169,3 @@ class Zone:
         scr.save(output+ '\\' + screen_name + '.png')
 
         return output + '\\' + screen_name + '.png'
-    
-    # @utils.add_error_info
-    # def is_template_in_zone(self, template, zone, invert=False):
-    #     """Pass template as image to be found on screen in the given zone.
-    #     Takes a screenshot of the passed area and find given data on the screenshot.
-    #     Returns results for each argument."""
-    #
-    #     area = self.get_area(zone)
-    #     screen = ImageProcessor()._get_screenshot(area)
-    #
-    #     if invert:
-    #         screen = ScreenshotOperations().invert_image(screen)
-    #
-    #     screen.save('scr.png')
-    #
-    #     print(MatchObjects().match_objects_with_knn(screen, template))
-    #
-    #     return MatchObjects().match_objects_with_knn(screen, template)
-    #
-    # @utils.add_error_info
-    # def match_template_in_zone(self, template, zone, invert=False):
-    #     area = self.get_area(zone)
-    #     screen = ImageProcessor()._get_screenshot(area)
-    #
-    #     if invert:
-    #         screen = ScreenshotOperations().invert_image(screen)
-    #
-    #     return MatchObjects().match_objects(template, screen)
-
-    # @utils.add_error_info
-    # def get_template_position(self, template, zone, threshold=None):
-    #     """The same as is_template_in_zone, but returns templates positions after search"""
-    #     cache = ImageProcessor().take_cache_screenshot()
-    #     screen = ImageProcessor()._get_screen(zone, cache)
-    #
-    #     return MatchObjects().match_and_return_coordinates(template, screen, threshold)

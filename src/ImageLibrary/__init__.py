@@ -29,6 +29,7 @@ class ImageLibrary(DynamicCore):
 
     ####    INIT    ####
     def __init__(self, screenshot_folder=None):
+
         self.screenshot_folder = screenshot_folder
         # main window
         self.screenshot_counter = 0
@@ -60,6 +61,8 @@ class ImageLibrary(DynamicCore):
     @keyword
     def hide_cursor(self):
         return ImageProcessor().hide_cursor()
+
+
 
 # import unittest
 # todo: tests

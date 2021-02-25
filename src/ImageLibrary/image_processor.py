@@ -12,6 +12,8 @@ from ImageLibrary.singleton import Singleton
 from ImageLibrary.error_handler import ErrorHandler
 from ImageLibrary import errors, utils
 from ImageLibrary.screenshot_operations import ScreenshotOperations
+from ImageLibrary.open_cv import MatchObjects
+
 
 pyautogui.FAILSAFE = False
 pyautogui.PAUSE = 0.05
@@ -456,3 +458,31 @@ class ImageProcessor(metaclass=Singleton):
     
         return os.path.join(output,
                             "guiproc-screenshot-%d.png" % (self._screenshot_counter))
+    
+    # def is_template_in_zone(self, template, zone):
+    #
+    #     screen = self._get_screenshot(zone)
+    #     screen.save('scr.png')
+    #     img = self.load_image(template)
+    #
+    #     return MatchObjects().match_objects_with_knn(screen, img)
+    #
+
+    # @utils.add_error_info
+    # def match_template_in_zone(self, template, zone, invert=False):
+    #     screen = self_get_screenshot(zone)
+    #
+    #     if invert:
+    #         screen = ScreenshotOperations().invert_image(screen)
+    #
+    #     return MatchObjects().match_objects(template, screen)
+    #
+    # @utils.add_error_info
+    # def get_template_position(self, template, zone, threshold=None):
+    #     """The same as is_template_in_zone, but returns templates positions after search"""
+    #     cache = self.take_cache_screenshot()
+    #     screen = self._get_screen(zone, cache)
+    #
+    #     return MatchObjects().match_and_return_coordinates(template, screen, threshold)
+
+        
