@@ -733,6 +733,14 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
             name argument is not passed
         """
         pass
+    
+    
+    @keyword
+    @window_function
+    def get_single_rgb_color_from_zone(self, zone):
+        """Returns the RGB color values as list from the given area. Works correct only if the provided area contains only one color.
+        Pass the desired coordinates to get color from."""
+        pass
 
     
     ###    VALUES      ####

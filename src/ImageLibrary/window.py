@@ -448,6 +448,10 @@ class Window(LibraryComponent):
     @utils.add_error_info
     def get_image_from_zone(self, zone, image_name=None):
         return self.zones[zone].get_image_from_zone(zone, image_name)
+    
+    @utils.add_error_info
+    def get_single_rgb_color_from_zone(self, zone):
+        return self.zones[zone].get_single_rgb_color_from_zone(zone)
 
 
     ####    VALUES      ####

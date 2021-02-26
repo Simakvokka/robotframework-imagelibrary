@@ -169,3 +169,12 @@ class Zone:
         scr.save(output+ '\\' + screen_name + '.png')
 
         return output + '\\' + screen_name + '.png'
+
+    @utils.add_error_info
+    def get_single_rgb_color_from_zone(self, zone):
+        screen = self.get_area(zone)
+        scr = ImageProcessor()._get_screenshot(screen)
+        rgb = scr.convert('RGB')
+        r, g, b = rgb.getpixel((1, 1))
+    
+        return [r, g, b]
