@@ -19,6 +19,7 @@ class ErrorHandler(object):
     def __init__(self, screenshot_folder):
 
         self.screenshot_folder = screenshot_folder
+            
         self.screenshot_counter = 1
         self.clear_history()
         self.info_message_counter = 1

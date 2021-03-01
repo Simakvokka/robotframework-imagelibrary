@@ -69,7 +69,7 @@ class ImageProcessor(object):
         self.cache_screenshot = None
         self.error_handler = error_handler
         self.output_dir = output_dir
-    
+
     def _screenshot(self, zone=None):
         # _screenshot([area]) -> Image
         # Get screenshot of specified area or whole game window if rect is None

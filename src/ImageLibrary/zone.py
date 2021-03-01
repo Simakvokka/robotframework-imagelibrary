@@ -26,6 +26,7 @@ def resize_img(img, resize):
 class Zone(object):
     def __init__(self, screenshot_folder, error_handler):
         self.screenshot_folder = screenshot_folder
+    
         self.error_handler = error_handler
         self.cache = False
     
@@ -78,7 +79,7 @@ class Zone(object):
             mydir = os.path.abspath(os.path.dirname(__file__))
             resdir = os.path.abspath(os.path.join(os.sep, mydir, tessdata_dir))
             config += ("--tessdata-dir %s -l %s " % (resdir, lang)).replace("\\", "//")
-        config += "-psm 8 -c tessedit_char_whitelist=0123456789"
+        config += "--psm 8 -c tessedit_char_whitelist=0123456789"
         
         txt = image_to_string(img, config=config)
         
@@ -121,7 +122,7 @@ class Zone(object):
             mydir = os.path.abspath(os.path.dirname(__file__))
             resdir = os.path.abspath(os.path.join(os.sep, mydir, tessdata_dir))
             config += ("--tessdata-dir %s -l %s " % (resdir, lang)).replace("\\", "//")
-        config += "-psm 8 -c tessedit_char_whitelist=.,0123456789"
+        config += "--psm 8 -c tessedit_char_whitelist=.,0123456789"
         
         txt = image_to_string(img, config=config)
         txt = float(txt)
@@ -165,7 +166,7 @@ class Zone(object):
             mydir = os.path.abspath(os.path.dirname(__file__))
             resdir = os.path.abspath(os.path.join(os.sep, mydir, tessdata_dir))
             config += ("--tessdata-dir %s -l %s " % (resdir, lang)).replace("\\", "//")
-        config += "-psm 6"
+        config += "--psm 6"
         
         txt = image_to_string(img, config=config)
         
@@ -209,7 +210,7 @@ class Zone(object):
             mydir = os.path.abspath(os.path.dirname(__file__))
             resdir = os.path.abspath(os.path.join(os.sep, mydir, tessdata_dir))
             config += ("--tessdata-dir %s -l %s " % (resdir, lang)).replace("\\", "//")
-        config += "-psm 6"
+        config += "--psm 6"
         
         txt = image_to_string(img, config=config)
         
@@ -227,7 +228,7 @@ class Zone(object):
             | Get Number With Text From Zone | zone=[x  y  w  h]
 
         """
-        
+
         if zone is None:
             raise Exception('Search zone should be passed as argument.')
         else:
@@ -261,5 +262,15 @@ class Zone(object):
         screen_img = ImageProcessor(self.error_handler, self.screenshot_folder)._screenshot(zone)
         ErrorHandler(self.screenshot_folder).save_pictures([(screen_img, "zone")])
 
+    @utils.add_error_info
+    def get_single_rgb_color_from_zone(self, zone):
+        """Returns the RGB color values as list from the given area. Works correct only if the provided area contains only one color.
+                Pass the desired coordinates to get color from."""
+        
+        scr = ImageProcessor(self.error_handler, self.screenshot_folder)._screenshot(zone)
+        rgb = scr.convert('RGB')
+        r, g, b = rgb.getpixel((1, 1))
+    
+        return [r, g, b]
 
 

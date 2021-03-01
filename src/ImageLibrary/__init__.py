@@ -7,6 +7,7 @@ from ImageLibrary.image_processor import ImageProcessor
 from ImageLibrary.error_handler import ErrorHandler
 from ImageLibrary.template import Template, ComplexTemplate
 from ImageLibrary.zone import Zone
+import os
 
 __version__ = '0.1.1'
 ROBOT_LIBRARY_SCOPE = 'GLOBAL'
@@ -14,7 +15,11 @@ ROBOT_LIBRARY_SCOPE = 'GLOBAL'
 
 class ImageLibrary(Template, ComplexTemplate, GUIProcess, Zone, Animations, ImageProcessor):
     def __init__(self, screenshot_folder=None):
-        self.screenshot_folder = screenshot_folder
+        if screenshot_folder is None:
+            self.screenshot_folder = os.getcwd()
+    
+        else:
+            self.screenshot_folder = screenshot_folder
         
         self.error_handler = ErrorHandler(self.screenshot_folder)
         
