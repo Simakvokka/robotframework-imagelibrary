@@ -265,65 +265,6 @@ class MatchObjects:
         else:
             return False
 
-class ImageToMatrix(object):
-    """Locates images from passed set of templates (in our case symbols images with all kinds of effects and animations)
-        and returns symbols matrix in numeric array."""
-
-    def __init__(self):
-        pass
-
-    def analyze_dataset(self, x, y, path_to_templates, image_to_analyze, threshold):
-
-        #makes a list of all template images from passed directory
-        templates = glob.glob(path_to_templates)
-        #reads the image from screenshot and convert it into Grey Color
-        img_rgb = cv2.imread(image_to_analyze)
-        img_gray = cv2.cvtColor(img_rgb, cv2.COLOR_BGR2GRAY)
-        #gets width and height for the screenshot image
-        q_w, q_h = img_gray.shape[::-1]
-
-        #tries to find symbol template matching on the screenshot image and returns as list with matching coordinates
-        collection = []
-        for myfile in templates:
-            template = cv2.imread(myfile, 0)
-
-            res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
-            #threshold = int(threshold)
-            loc = np.where(res >= threshold)
-            matches = myfile, zip(*loc[::-1])
-            #transforms 1.9.png, 2.3.png into 1 and 2. etc to get the normal symbol id
-            pattern = matches[0]
-            match = re.search("[0-9]+.[0-9]+.png", pattern)
-            symbol = match.group(0)
-            symbol = re.sub('.[0-9]+.png', '', str(symbol))
-
-            m = (symbol, matches[1])
-
-            collection.append(m)
-
-        return self.image_to_matrix(x, y, q_w, q_h, collection)
-
-    def image_to_matrix(self, x,
-                              y,
-                              width,
-                              height,
-                              found_data):
-
-        """Transforms found symbols on the screenshot into matrix view. Returns an array."""
-
-        result_arr = np.zeros((y, x), dtype=int)
-        col_step = int(width / x)
-        row_step = int(height / y)
-
-        for el in found_data:
-            symbol = el[0]
-            for coordinate in el[1]:
-                row = round(coordinate[1] / float(row_step))
-                col = round(coordinate[0] / float(col_step))
-                result_arr[int(row), int(col)] = symbol
-
-        return result_arr
-
 
 import unittest
 from PIL import Image
