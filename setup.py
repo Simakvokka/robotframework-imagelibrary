@@ -12,7 +12,7 @@ with open(join(CURDIR, 'README.md')) as f:
 
 setup(
     name             = 'robotframework-imagelibrary',
-    version          = '0.1.1',
+    version          = '0.2.0',
     description      = 'Image Processing Library For Robot Framework',
     long_description = DESCRIPTION,
     author           = 'Prokhorova Maria',
