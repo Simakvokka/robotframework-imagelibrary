@@ -1,0 +1,7 @@
+- **Bug fixes**
+- **Keyword to get single RGB value from particular position** - `Get Single RGB Color From Zone   zone=zone`
+
+This is the last update for this library version. The upcoming release brings the restructured library with new concepts of
+usage and dealing with keywords. Also it will support only Python 3+ versions. 2.7 will be deprecated.
+
+
