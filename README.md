@@ -18,6 +18,12 @@ pip install robotframework-imagelibrary
 
 [Keyword documentation](https://simakvokka.github.io/robotframework-imagelibrary/ImageLibrary.html)
 
+[Old 0.2.0 version](https://simakvokka.github.io/robotframework-imagelibrary/docs/ImageLibrary_0.2.0.html)
+
+Search 0.2.0 version on [pypi](https://pypi.org/project/robotframework-imagelibrary/#history) 
+
+
+
 **Buttons guide**
 
 [Buttons documentation](https://simakvokka.github.io/robotframework-imagelibrary/ButtonsGuide.html)
