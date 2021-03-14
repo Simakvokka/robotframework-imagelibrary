@@ -1,7 +1,6 @@
 from __future__ import division
 
-import os
-import re
+import os, re
 from PIL import Image
 from pytesseract import image_to_string
 from ImageLibrary.image_processor import ImageProcessor
@@ -10,7 +9,7 @@ from ImageLibrary import utils
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 from robot.api import logger as LOGGER
 
-def resize_after(img, resize):
+def resize_after_screenshot_modification(img, resize):
     """"Stretches the initial image
                 PIL.IMAGE filters:
                 ANTIALIAS
@@ -69,13 +68,13 @@ class Zone:
         
     '''Returns integers'''
     @utils.add_error_info
-    def get_number_from_zone(self, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
-        img = ImageProcessor().get_image_to_recognize(self.get_area(), cache, resize_percent, contrast, contour, invert, brightness, change_mode)
+    def get_number_from_zone(self, lang=None, resize_before=0, resize_after=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
+        img = ImageProcessor().get_image_to_recognize(self.get_area(), cache, resize_before, contrast, contour, invert, brightness, change_mode)
 
-        resize = int(resize)
+        resize = int(resize_after)
         if int(resize) > 0:
             resize = int(resize)
-            img = resize_after(img, resize)
+            img = resize_after_screenshot_modification(img, resize)
             
         config = ""
         config += "-psm 8 -c tessedit_char_whitelist=0123456789"
@@ -89,28 +88,30 @@ class Zone:
 
     '''Returns float numbers'''
     @utils.add_error_info
-    def get_float_number_from_zone(self, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
-        img = ImageProcessor().get_image_to_recognize(self.get_area(), cache, resize_percent, contrast, contour, invert, brightness, change_mode)
-        resize = int(resize)
+    def get_float_number_from_zone(self, lang=None, resize_before=0, resize_after=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
+        img = ImageProcessor().get_image_to_recognize(self.get_area(), cache, resize_before, contrast, contour, invert, brightness, change_mode)
+        resize = int(resize_after)
         if resize > 0:
-            img = resize_after(img, resize)
+            img = resize_after_screenshot_modification(img, resize)
             
         config = ""
         config += "-psm 8 -c tessedit_char_whitelist=.,0123456789"
 
         try:
-            return float(image_to_string(img, config=config))
+            x = float(image_to_string(img, config=config))
+            return x
         except ValueError as e:
             msg = "Error while parsing number: " + str(e)
             ErrorHandler().report_error(msg, ("img", img))
             raise
+        
 
     @utils.add_error_info
-    def get_number_with_text_from_zone(self, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
-        img = ImageProcessor().get_image_to_recognize(self.get_area(), cache, resize_percent, contrast, contour, invert, brightness, change_mode)
-        resize = int(resize)
+    def get_number_with_text_from_zone(self, lang=None, resize_before=0, resize_after=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
+        img = ImageProcessor().get_image_to_recognize(self.get_area(), cache, resize_before, contrast, contour, invert, brightness, change_mode)
+        resize = int(resize_after)
         if resize > 0:
-            img = resize_after(img, resize)
+            img = resize_after_screenshot_modification(img, resize)
         
         config = ""
         config += "-psm 6"
@@ -130,15 +131,15 @@ class Zone:
             raise
 
     @utils.add_error_info
-    def get_text_from_zone(self, lang=None, resize_percent=0, resize=0, contrast=0, cache=False,
+    def get_text_from_zone(self, lang=None, resize_before=0, resize_after=0, contrast=0, cache=False,
                                        contour=False, invert=False, brightness=0, change_mode=True, tessdata_dir=None):
 
-        img = ImageProcessor().get_image_to_recognize(self.get_area(), cache, resize_percent, contrast, contour, invert, brightness, change_mode)
+        img = ImageProcessor().get_image_to_recognize(self.get_area(), cache, resize_before, contrast, contour, invert, brightness, change_mode)
 
-        resize = int(resize)
+        resize = int(resize_after)
         if int(resize) > 0:
             resize = int(resize)
-            img = resize_after(img, resize)
+            img = resize_after_screenshot_modification(img, resize)
 
         config = ""
         config += "--psm 6"

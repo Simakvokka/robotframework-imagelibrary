@@ -1,6 +1,4 @@
-import yaml
-import re
-import os
+import yaml, re, os
 import tkinter as tk
 from robot.api import logger as LOGGER
 from ImageLibrary.libcore.librarycomponent import LibraryComponent
@@ -83,7 +81,7 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
 
    
     @keyword
-    def init(self, settings_file, reference_folders, area=None):
+    def init(self, settings, references, area=None):
 
         """Initializes ImageLibrary for current suite run.
             Pass as args:
@@ -91,29 +89,8 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
             settings_file - path to .yaml configs as list
             reference_folders - path to screens folders as list
             area - window area taken with keyword Get Window Area
-            log_type - if init Haxe tests pass 'browser'
-            update_config - to change some options from .yaml config for current suite run pass a yaml dict like string with proper values
-                Examples:
-                    ${update_config}      {'main': {'multiple_buttons': {'minus': {'direction': 'horizontal',
-                    ...                               'expected_count': '1',
-                    ...                                'image': 'minus.png',
-                    ...                                'threshold': '0.999'},
-                    ...                    'minus_d': {'direction': 'horizontal',
-                    ...                                 'expected_count': '1',
-                    ...                                  'image': 'minus_d.png',
-                    ...                                  'threshold': '0.999'},
-                    ...                      'plus': {'direction': 'horizontal',
-                    ...                               'expected_count': '1',
-                    ...                               'image': 'plus.png',
-                    ...                               'threshold': '0.999'},
-                    ...                      'plus_d': {'direction': 'horizontal',
-                    ...                                'expected_count': '1',
-                    ...                                 'image': 'plus_d.png',
-                    ...                                 'threshold': '0.999'}}}}
-
-                    ${update_config}        {'main':{'buttons':{'start': 'take_d.png', 'bet': '-'}}}
-
-
+            
+            Examples:
 
             |  Init  =  |   ${Settings}   |  ${References}   |    ${windowArea}  |  update_config=${update_config}
 
@@ -130,10 +107,10 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
         self.settings = {}
         self.button_registry = GlobalButtonRegistry('hack')
         
-        assert settings_file is not None, "YAML config file must not be empty and must contain 'main' window section with at least one of buttons|templates|zones etc"
+        assert settings is not None, "YAML config file must not be empty and must contain 'main' window section with at least one of buttons|templates|zones etc"
 
-        if hasattr(settings_file, '__iter__'):
-            for setting in settings_file:
+        if hasattr(settings, '__iter__'):
+            for setting in settings:
                 with open(setting, 'r') as f:
                     config = yaml.safe_load(f)
 
@@ -143,7 +120,7 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
 
                 self.settings.update(config)
         else:
-            with open(settings_file) as f:
+            with open(settings) as f:
                 config = yaml.safe_load(f)
    
         if "global_buttons_defs" in config:
@@ -151,7 +128,7 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
             del config["global_buttons_defs"]
         self.settings.update(config)
 
-        self.reference_folders = reference_folders
+        self.reference_folders = references
         _check_config(self.settings, self.reference_folders)
 
         if area is None:
@@ -167,7 +144,7 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
         self.error_handler = ErrorHandler(self.screenshot_folder, self.area)
         
         try:
-            self.image_processor = ImageProcessor(self.area, OpenCV(), reference_folders, self.error_handler)
+            self.image_processor = ImageProcessor(self.area, OpenCV(), references, self.error_handler)
         except TypeError:
             LOGGER.info(
                 "Something went wrong while the ImageLibrary library init process: it doesn't get the required params.\n"
@@ -217,10 +194,10 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
         """Saves the current state. Saves the screenshot of the currently active area."""
         self.error_handler.save_state()
 
-    @keyword
-    def show_build_quality(self):
-        """Shows an image in html log."""
-        self.error_handler.show_build_quality()
+    # @keyword
+    # def show_build_quality(self):
+    #     """Shows an image in html log."""
+    #     self.error_handler.show_build_quality()
 
     @keyword
     def clear_screenshots_history(self):
@@ -511,7 +488,7 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
     #         |   ${is_on_screen} = | Is Template In Zone | template=templ_name.png | zone=zone_coordinates
     #     """
     #     pass
-
+    #
     # @keyword
     # @window_function
     # def match_template_in_zone(self, template, zone):
@@ -524,14 +501,14 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
     #
     # @keyword
     # @window_function
-    # def get_template_position(self, template, zone):
+    # def get_template_position(self, template, zone=None):
     #     """Returns the found template coordinates from the provided zone.
     #
     #         Examples:
     #         |   ${pos} = | Get Template Position | template=templ_name | zone=zone_coordinates
     #     """
     #     pass
-    #
+
     
     
     ###    BUTTONS     ####
@@ -690,20 +667,20 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
     ####    IMAGE RECOGNIZION   ####
     @keyword
     @window_function
-    def get_number_from_zone(self, zone, lang=None, resize_percent=0,  brightness=0, resize=0, contrast=0, cache=False,
+    def get_number_from_zone(self, zone, lang=None, resize_before=0,  brightness=0, resize_after=0, contrast=0, cache=False,
                              contour=False, invert=False, window=None, wind_index=-1):
         """Returns the recognized number from the given zone.
 
             All arguments except _zone_ are optional. _cache_ is False and must not be changed.
 
             Examples:
-            |   ${win} = | Get Number From Zone | zone=win | lang=lang_name | resize_pecent=30 or resize=30 | contrast=1 | background=zone_background | contour=${False} | invert=${False} | brightness=1
+            |   ${win} = | Get Number From Zone | zone=win | lang=lang_name | resize_pecent=30 or resize_after=30 | contrast=1 | background=zone_background | contour=${False} | invert=${False} | brightness=1
         """
         pass
 
     @keyword
     @window_function
-    def get_float_number_from_zone(self, zone, lang=None, resize_percent=0,  brightness=0, resize=0, contrast=0, cache=False, window=None,
+    def get_float_number_from_zone(self, zone, lang=None, resize_before=0,  brightness=0, resize_after=0, contrast=0, cache=False, window=None,
                                    wind_index=-1, invert=False):
         """Same as `Get Number From Zone` but returns float number.
         """
@@ -711,7 +688,7 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
 
     @keyword
     @window_function
-    def get_number_with_text_from_zone(self, zone, lang=None, resize_percent=0, resize=0, contrast=0, cache=False,
+    def get_number_with_text_from_zone(self, zone, lang=None, resize_before=0, resize_after=0, contrast=0, cache=False,
                                        contour=False, invert=False, brightness=0, change_mode=True):
         """Same as `Get Number From Zone` but also recognizes text if there are numbers with text in the given zone.
         After processing text is deleted, only number is returned. We use it for win fields: 10 Won.
@@ -720,7 +697,7 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
 
     @keyword
     @window_function
-    def get_text_from_zone(self, zone, lang=None, resize_percent=0, resize=0, contrast=0, cache=False,
+    def get_text_from_zone(self, zone, lang=None, resize_before=0, resize_after=0, contrast=0, cache=False,
                                        contour=False, invert=False, brightness=0, change_mode=True):
         """Returns the recognized text from zone, if there is only text. Arguments logic is the same as for `Get Number From Zone`
         """
@@ -793,24 +770,24 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
     def get_count_for_iterator(self, iterator):
         return len(iterator)
 
-    @keyword
-    @window_function
-    def compare_images(self, image, screen):
-        """Compares two given images. Returns boolean.
-            Pass the template image and screened image.
-
-            Examples:
-            |   Compare Images  image1 | image2
-        """
-        pass
+    # @keyword
+    # @window_function
+    # def compare_images(self, image, screen):
+    #     """Compares two given images. Returns boolean.
+    #         Pass the template image and screened image.
+    #
+    #         Examples:
+    #         |   Compare Images  image1 | image2
+    #     """
+    #     pass
 
     
-    ####    OTHER       ####
-    @keyword
-    @window_function
-    def save_zone_content_to_output(self, zone, window=None, wind_index=-1):
-        """FOR DEBUG: saves the content (screenshot) of the provided zone. Pass zone. Image is saved to the 'output' folder or the test root folder.
-        """
-        pass
+    # ####    OTHER       ####
+    # @keyword
+    # @window_function
+    # def save_zone_content_to_output(self, zone, window=None, wind_index=-1):
+    #     """FOR DEBUG: saves the content (screenshot) of the provided zone. Pass zone. Image is saved to the 'output' folder or the test root folder.
+    #     """
+    #     pass
 
 

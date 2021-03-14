@@ -317,25 +317,25 @@ class Window(LibraryComponent):
         return self.complex_templates[template].wait_for_complex_template_to_hide(threshold, timeout, zone)
     
     
-    # @utils.add_error_info
-    # def is_template_in_zone(self, template, index=-1, threshold=None, cache=False, zone=None):
-    #     template, index = utils.split_to_name_and_index(template, index)
-    #     if zone is not None:
-    #         zone, zindex = utils.split_to_name_and_index(zone, None)
-    #         zone = self.zones[zone].get_area(zindex) if zone is not None else None
-    #     return self.templates[template].is_template_in_zone(index, threshold, cache, zone)
+    @utils.add_error_info
+    def is_template_in_zone(self, template, index=-1, threshold=None, cache=False, zone=None):
+        template, index = utils.split_to_name_and_index(template, index)
+        if zone is not None:
+            zone, zindex = utils.split_to_name_and_index(zone, None)
+            zone = self.zones[zone].get_area(zindex) if zone is not None else None
+        return self.templates[template].match_template_in_zone(index, threshold, cache, zone)
 
-    #
-    # @utils.add_error_info
-    # def match_template_in_zone(self, template, zone):
-    #     area = self.zones[zone].get_area() if zone is not None else None
-    #     return ImageProcessor().is_template_in_zone(template, area)
-    #
-    #
-    # @utils.add_error_info
-    # def get_template_position(self, template, zone):
-    #     area = self.zones[zone].get_area() if zone is not None else None
-    #     return ImageProcessor().get_template_position(template, area)
+
+    @utils.add_error_info
+    def match_template_in_zone(self, template, zone):
+        area = self.zones[zone].get_area() if zone is not None else None
+        return ImageProcessor().is_template_in_zone(template, area)
+
+
+    @utils.add_error_info
+    def get_template_position(self, template, zone=None):
+        area = self.zones[zone].get_area() if zone is not None else None
+        return self.templates[template].get_template_position(template, area)
 
 
     ####    BUTTONS     ####
@@ -426,23 +426,23 @@ class Window(LibraryComponent):
     ####    IMAGE RECOGNIZION   ####
 
     @utils.add_error_info
-    def get_number_from_zone(self, zone, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
-         return self.zones[zone].get_number_from_zone(lang, resize_percent, resize, contrast, cache, contour, invert, brightness, change_mode)
+    def get_number_from_zone(self, zone, lang=None, resize_before=0, resize_after=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
+         return self.zones[zone].get_number_from_zone(lang, resize_before, resize_after, contrast, cache, contour, invert, brightness, change_mode)
 
 
     @utils.add_error_info
-    def get_float_number_from_zone(self, zone, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
-        return self.zones[zone].get_float_number_from_zone(lang, resize_percent, resize, contrast, cache, contour, invert, brightness, change_mode)
+    def get_float_number_from_zone(self, zone, lang=None, resize_before=0, resize_after=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
+        return self.zones[zone].get_float_number_from_zone(lang, resize_before, resize_after, contrast, cache, contour, invert, brightness, change_mode)
 
 
     @utils.add_error_info
-    def get_number_with_text_from_zone(self, zone, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
-        return self.zones[zone].get_number_with_text_from_zone(lang, resize_percent, resize, contrast, cache, contour, invert, brightness, change_mode)
+    def get_number_with_text_from_zone(self, zone, lang=None, resize_before=0, resize_after=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
+        return self.zones[zone].get_number_with_text_from_zone(lang, resize_before, resize_after, contrast, cache, contour, invert, brightness, change_mode)
 
 
     @utils.add_error_info
-    def get_text_from_zone(self, zone, lang=None, resize_percent=0, resize=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
-        return self.zones[zone].get_text_from_zone(lang, resize_percent, resize, contrast, cache, contour, invert, brightness, change_mode)
+    def get_text_from_zone(self, zone, lang=None, resize_before=0, resize_after=0, contrast=0, cache=False, contour=False, invert=False, brightness=0, change_mode=True):
+        return self.zones[zone].get_text_from_zone(lang, resize_before, resize_after, contrast, cache, contour, invert, brightness, change_mode)
 
 
     @utils.add_error_info
@@ -484,26 +484,16 @@ class Window(LibraryComponent):
     ####    OTHER       ####
     #debug only, maybe rework
 
-    #@utils.debug_only
-    def save_zone_content_to_output(self, zone):
-        zone = self.zones[zone].get_area()
-        screen_img = ImageProcessor()._get_screenshot(area=zone)
-        ErrorHandler().save_pictures([(screen_img, "zone")])
+    # #@utils.debug_only
+    # def save_zone_content_to_output(self, zone):
+    #     zone = self.zones[zone].get_area()
+    #     screen_img = ImageProcessor()._get_screenshot(area=zone)
+    #     ErrorHandler().save_pictures([(screen_img, "zone")])
 
 
-    def compare_images(self, image, screen):
-        dir = os.path.abspath(os.path.dirname(__file__))
-        imdir = os.path.abspath(os.path.join(os.sep, dir, image))
-        image = imdir + '\\' + id + '\\' + image
-
-        return ImageComparison().return_comparison_result(image, screen)
-
-
-import unittest
-##Unittests are deprecated and not working now. Sorry!
-
-class WindowTests(unittest.TestCase):
-   pass
-
-if __name__ == '__main__':
-    unittest.main()
+    # def compare_images(self, image, screen):
+    #     dir = os.path.abspath(os.path.dirname(__file__))
+    #     imdir = os.path.abspath(os.path.join(os.sep, dir, image))
+    #     image = imdir + '\\' + id + '\\' + image
+    #
+    #     return ImageComparison().return_comparison_result(image, screen)

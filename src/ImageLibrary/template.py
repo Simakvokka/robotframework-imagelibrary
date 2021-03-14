@@ -28,7 +28,6 @@ class Template:
             #assert index > 0, "Index must by more that zero"
             assert index <= len(self.images), "{} has only {} elements, index is to big".format(self.name, len(self.images))
             return self.images[index - 1]
-        print(self.images)
         return self.image
 
     @utils.add_error_info
@@ -133,3 +132,36 @@ class ComplexTemplate(object):
             if not waiting_result:
                 return waiting_result
         return waiting_result
+
+    #todo
+    # @utils.add_error_info
+    # def get_template_position(self, template, threshold=0.99):
+    #     """Returns template's coordinates after search. You can also specify the threshold value.
+    #         Examples:
+    #         | Get Template Position | template=img.png | threshold=${None}
+    #     """
+    #
+    #
+    #     threshold = float(threshold)
+    #     screen = ImageProcessor()._screenshot()
+    #     return MatchObjects().match_and_return_coordinates(template, screen, threshold)
+    #
+    #
+    # @utils.add_error_info
+    # def match_template_in_zone(self, template, zone, invert=False):
+    #     screen = ImageProcessor()._get_screenshot(zone)
+    #
+    #     if invert:
+    #         screen = ScreenshotOperations().invert_image(screen)
+    #
+    #     return MatchObjects().match_objects(template, screen)
+    #
+    # @utils.add_error_info
+    # def is_template_in_zone(self, template, zone):
+    #
+    #     screen = ImageProcessor()._get_screenshot(zone)
+    #     screen.save('scr.png')
+    #     img = ImageProcessor().load_image(template)
+    #
+    #     return MatchObjects().match_objects_with_knn(screen, img)
+    #

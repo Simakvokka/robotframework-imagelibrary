@@ -224,46 +224,46 @@ class MatchObjects:
             else:
                 LOGGER.error('No matching template found.')
 
-    def match_objects_with_knn(self, screen, template, ratio_threshold=0.5):
-        """Uses the K-Nearest Neighbours algorithm to find the match on screen.
-        """
-        #img1 = cv2.imread(template, 2)  # what
-        img1 = np.array(template)
-        img1 = cv2.Canny(img1, 100, 700, apertureSize=3, L2gradient=False)
-        img2 = np.asarray(screen)  # where
-        img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
-        img2 = cv2.Canny(img2, 100, 700, apertureSize=3, L2gradient=False)
-
-        # -- Step 1: Detect the keypoints using SURF Detector, compute the descriptors
-        minHessian = 400
-        detector = cv2.xfeatures2d.SURF_create(hessianThreshold=minHessian)
-        keypoints1, descriptors1 = detector.detectAndCompute(img1, None)
-        keypoints2, descriptors2 = detector.detectAndCompute(img2, None)
-        # -- Step 2: Matching descriptor vectors with a FLANN based matcher
-        # Since SURF is a floating-point descriptor NORM_L2 is used
-        matcher = cv2.DescriptorMatcher_create(cv2.DescriptorMatcher_FLANNBASED)
-        knn_matches = matcher.knnMatch(descriptors1, descriptors2, 2)
-        # -- Filter matches using the Lowe's ratio test
-        ratio_thresh = ratio_threshold
-        good_matches = []
-        for m, n in knn_matches:
-            if m.distance < ratio_thresh * n.distance:
-                good_matches.append(m)
-    
-
-        # -- Draw matches
-        img_matches = np.empty((max(img1.shape[0], img2.shape[0]), img1.shape[1] + img2.shape[1], 3), dtype=np.uint8)
-        cv2.drawMatches(img1, keypoints1, img2, keypoints2, good_matches, img_matches,
-                        flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-
-        # -- Save matched result
-        im = Image.fromarray(img_matches)
-        im.save('objects_match_knn_result.png')
-
-        if len(good_matches) > 0:
-            return True
-        else:
-            return False
+    # def match_objects_with_knn(self, screen, template, ratio_threshold=0.5):
+    #     """Uses the K-Nearest Neighbours algorithm to find the match on screen.
+    #     """
+    #     #img1 = cv2.imread(template, 2)  # what
+    #     img1 = np.array(template)
+    #     img1 = cv2.Canny(img1, 100, 700, apertureSize=3, L2gradient=False)
+    #     img2 = np.asarray(screen)  # where
+    #     img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+    #     img2 = cv2.Canny(img2, 100, 700, apertureSize=3, L2gradient=False)
+    #
+    #     # -- Step 1: Detect the keypoints using SURF Detector, compute the descriptors
+    #     minHessian = 400
+    #     detector = cv2.xfeatures2d.SURF_create(hessianThreshold=minHessian)
+    #     keypoints1, descriptors1 = detector.detectAndCompute(img1, None)
+    #     keypoints2, descriptors2 = detector.detectAndCompute(img2, None)
+    #     # -- Step 2: Matching descriptor vectors with a FLANN based matcher
+    #     # Since SURF is a floating-point descriptor NORM_L2 is used
+    #     matcher = cv2.DescriptorMatcher_create(cv2.DescriptorMatcher_FLANNBASED)
+    #     knn_matches = matcher.knnMatch(descriptors1, descriptors2, 2)
+    #     # -- Filter matches using the Lowe's ratio test
+    #     ratio_thresh = ratio_threshold
+    #     good_matches = []
+    #     for m, n in knn_matches:
+    #         if m.distance < ratio_thresh * n.distance:
+    #             good_matches.append(m)
+    #
+    #
+    #     # -- Draw matches
+    #     img_matches = np.empty((max(img1.shape[0], img2.shape[0]), img1.shape[1] + img2.shape[1], 3), dtype=np.uint8)
+    #     cv2.drawMatches(img1, keypoints1, img2, keypoints2, good_matches, img_matches,
+    #                     flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    #
+    #     # -- Save matched result
+    #     im = Image.fromarray(img_matches)
+    #     im.save('objects_match_knn_result.png')
+    #
+    #     if len(good_matches) > 0:
+    #         return True
+    #     else:
+    #         return False
 
 
 import unittest

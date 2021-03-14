@@ -108,25 +108,25 @@ class GUIProcess(Process.Process):
             self._report_message(msg, image_info, screen_info)
             raise ImageNotFoundException(reference_image)
         
-    @keyword
-    def start_gui_process(self, command, *args, **kwargs):
-        handle = self.start_process(command, *args, **kwargs)
-        proc = self.get_process_object(handle)
-
-        max_time = time.time() + self.START_GUI_TIMEOUT
-        while self.is_process_running(handle) and not hasattr(proc, 'wnd'):
-            awnd = _gui.get_active_window()
-            if awnd and proc.pid == _gui.get_window_pid(awnd):
-                proc.wnd = awnd
-                break
-
-            if time.time() > max_time:
-                self.terminate_process(handle, kill=True)
-                raise RuntimeError(f"Failed to start GUI '{command}', window not found!")
-            time.sleep(self.START_GUI_PERIOD)
-
-        return handle
-    
+    # @keyword
+    # def start_gui_process(self, command, *args, **kwargs):
+    #     handle = self.start_process(command, *args, **kwargs)
+    #     proc = self.get_process_object(handle)
+    #
+    #     max_time = time.time() + self.START_GUI_TIMEOUT
+    #     while self.is_process_running(handle) and not hasattr(proc, 'wnd'):
+    #         awnd = _gui.get_active_window()
+    #         if awnd and proc.pid == _gui.get_window_pid(awnd):
+    #             proc.wnd = awnd
+    #             break
+    #
+    #         if time.time() > max_time:
+    #             self.terminate_process(handle, kill=True)
+    #             raise RuntimeError(f"Failed to start GUI '{command}', window not found!")
+    #         time.sleep(self.START_GUI_PERIOD)
+    #
+    #     return handle
+    #
     #@keyword
     #todo: keyword might be useless
     # def activate_gui_process(self, handle):
@@ -171,112 +171,14 @@ class GUIProcess(Process.Process):
         wnd = _gui.get_active_window()
         return _gui.get_window_client_rect(wnd)
 
-    # ALL BELOW COPIED FROM ImageHorizonLibrary AND UPDATED FOR OUR LIBRARY
-    @keyword
-    def move_to(self, *coordinates):
-        """Code taken from ImageHorizonLibrary"""
-
-        """Moves the mouse pointer to an absolute coordinates.
-        ``coordinates`` can either be a Python sequence type with two values
-        (eg. ``(x, y)``) or separate values ``x`` and ``y``:
-        | Move To         | 25             | 150       |     |
-        | @{coordinates}= | Create List    | 25        | 150 |
-        | Move To         | ${coordinates} |           |     |
-        | ${coords}=      | Evaluate       | (25, 150) |     |
-        | Move To         | ${coords}      |           |     |
-        X grows from left to right and Y grows from top to bottom, which means
-        that top left corner of the screen is (0, 0)
-        """
-        if len(coordinates) > 2 or (len(coordinates) == 1 and
-                                    type(coordinates[0]) not in (list, tuple)):
-            raise Exception('Invalid number of coordinates. Please give '
-                                 'either (x, y) or x, y.')
-        if len(coordinates) == 2:
-            coordinates = (coordinates[0], coordinates[1])
-        else:
-            coordinates = coordinates[0]
-        try:
-            coordinates = [int(coord) for coord in coordinates]
-        except ValueError:
-            raise Exception('Coordinates %s are not integers' %
-                                 (coordinates,))
-        ag.moveTo(*coordinates)
-
-    def _convert_to_valid_special_key(self, key):
-        key = str(key).lower()
-        if key.startswith('key.'):
-            key = key.split('key.', 1)[1]
-        elif len(key) > 1:
-            return None
-        if key in ag.KEYBOARD_KEYS:
-            return key
-        return None
-
-    def _validate_keys(self, keys):
-        valid_keys = []
-        for key in keys:
-            valid_key = self._convert_to_valid_special_key(key)
-            if not valid_key:
-                raise Exception('Invalid keyboard key "%s", valid '
-                                        'keyboard keys are:\n%r' %
-                                        (key, ', '.join(ag.KEYBOARD_KEYS)))
-            valid_keys.append(valid_key)
-        return valid_keys
-
-    def _press(self, *keys, **options):
-        keys = self._validate_keys(keys)
-        ag.hotkey(*keys, **options)
-
-    @keyword
-    def press_combination(self, *keys):
-        """Press given keyboard keys.
-        All keyboard keys must be prefixed with ``Key.``.
-        Keyboard keys are case-insensitive:
-        | Press Combination | KEY.ALT | key.f4 |
-        | Press Combination | kEy.EnD |        |
-        [https://pyautogui.readthedocs.org/en/latest/keyboard.html#keyboard-keys|
-        See valid keyboard keys here].
-        """
-        self._press(*keys)
         
     @keyword
-    def type(self, *keys_or_text):
+    def type(self, key):
         """Type text and keyboard keys.
-        See valid keyboard keys in `Press Combination`.
+          
+           Used for quick operations with keyboard and not like full _Type   key_ keyword from ImageHorizon Library. Use carefully
+         
         Examples:
-        | Type | separated              | Key.ENTER | by linebreak |
-        | Type | Submit this with enter | Key.enter |              |
-        | Type | key.windows            | notepad   | Key.enter    |
+        | Type | enter
         """
-        for key_or_text in keys_or_text:
-            key = self._convert_to_valid_special_key(key_or_text)
-            if key:
-                pyautogui.press(key)
-            else:
-                pyautogui.typewrite(key_or_text)
-
-    @keyword
-    def type_with_keys_down(self, text, *keys):
-        """Press keyboard keys down, then write given text, then release the
-        keyboard keys.
-        See valid keyboard keys in `Press Combination`.
-        Examples:
-        | Type with keys down | write this in caps  | Key.Shift |
-        """
-        valid_keys = self._validate_keys(keys)
-        for key in valid_keys:
-            pyautogui.keyDown(key)
-            pyautogui.typewrite(text)
-        for key in valid_keys:
-            pyautogui.keyUp(key)
-            
-    @keyword
-    def click_image(self, reference_image, threshold=0.98):
-        """Finds the reference image on screen and clicks it once.
-        ``reference_image`` is automatically normalized as described in the
-        `Reference image names`.
-        """
-        center_location = self._locate(reference_image, threshold)
-        LOGGER.info(f'Clicking image {reference_image} in position {center_location}')
-        ag.click(center_location)
-        return center_location
+        pyautogui.press(key)

@@ -76,4 +76,7 @@ class ButtonsPanel(Button):
         # to start from 1 index. Old in case not to mix with programming languages logic where indexing starts from 0
         #assert index > 0, "Index must by more that zero"
         assert index <= len(self.buttons), "Index must be less then elements count"
-        self.click_center(self.buttons[index-1], times)
+        try:
+            self.click_center(self.buttons[index], times)
+        except 	WindowsError:
+            self.click_center(self.buttons[index], times)
