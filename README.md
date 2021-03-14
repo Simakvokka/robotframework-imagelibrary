@@ -18,7 +18,7 @@ pip install robotframework-imagelibrary
 
 [Keyword documentation](https://simakvokka.github.io/robotframework-imagelibrary/ImageLibrary_0.2.0.html)
 
-**Buttons guide **
+**Buttons guide**
 
 [Buttons documentation](https://simakvokka.github.io/robotframework-imagelibrary/ButtonsGuide.html)
 
@@ -71,7 +71,7 @@ _Example_
 `${num} =  Get Number From Zone    zone=price   resize_after=30   contrast=1`
 
 
-* Zones *
+**Zones**
 	Coordinates are taken in such format  [x, y, w, h]:  [123, 34, 12, 10]
 	 
 	 | x - from the top left corner of the desired window
