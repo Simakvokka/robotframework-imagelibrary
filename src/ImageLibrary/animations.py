@@ -1,56 +1,74 @@
-from __future__ import absolute_import
-
+import datetime
+from ImageLibrary.error_handler import ErrorHandler
 from ImageLibrary.image_processor import ImageProcessor
 from ImageLibrary import utils
 
+class Animations:
+    def __init__(self):
+        pass
 
-class Animations(object):
+    def wait_for_animation_stops(self, zone=None, timeout=15, threshold=0.99, step=0.5):
+        #convert passed args to float values
+        timeout = float(timeout)
+        threshold = float(threshold)
+        step = float(step)
 
-    def __init__(self, error_handler, output_dir):
-        self.error_handler = error_handler
-        self.output_dir = output_dir
-        
-        
-        
-    ####    ANIMATIONS      ####
-    @utils.add_error_info
-    def wait_for_animation_stops(self, zone=None, timeout=15, threshold=0.99, step=0.1):
-        """Wait until animation stops in the given zone or in the whole active window if zone is not provided.
-        Pass _zone_, _timeout_, _step_, _thrreshold_ as arguments. All are optional.
-        Default values are given in the example.
+        #gets the first screenshot from given zone (if zone is none, takes the whole active window)
+        new_screen = ImageProcessor()._get_screen(False, zone)
+        #saves the time starting point (when the first screenshot was taken)
+        start_time = datetime.datetime.now()
 
-        Examples:
-        | Wait For Animation Stops | zone=zone_coordinates | timeout=15 | threshold=0.99 | step=0.1
-        
-        """
+        #In a loop compares the screenshot with previously taken from screen.
+        #If images are identical returns True, else continue until timeout occurs - throws error and returns False.
+        while True:
+            utils.sleep(step)
+            old_screen = new_screen
+            new_screen = ImageProcessor()._get_screen(False, zone)
 
-        return ImageProcessor(self.error_handler, self.output_dir)._wait_for_animation_stops(zone, timeout, threshold, step)
+            result = ImageProcessor().find_image_result(new_screen, old_screen, threshold)
+            if result.found:
+                return True
+            if (datetime.datetime.now() - start_time).seconds > timeout:
+                break
 
+        ErrorHandler().report_warning("Timeout exceeded while waiting for animation stops")
+        return False
 
-    @utils.add_error_info
-    def wait_for_animation_starts(self, zone=None, timeout=15, threshold=0.99, step=0.1):
-        """Same as `Wait For Animation Stops` but on the contrary.
-        Pass _zone_, _timeout_, _step_, _thrreshold_ as arguments. All are optional.
-        Default values are given in the example.
+    def wait_for_animation_starts(self, zone=None, timeout=15, threshold=0.99, step=0.5):
+        #convert passed args to float values
+        timeout = float(timeout)
+        threshold = float(threshold)
+        step = float(step)
+        # gets the first screenshot from given zone (if zone is none, takes the whole active window)
+        new_screen = ImageProcessor()._get_screen(False, zone)
+        # saves the time starting point (when the first screenshot was taken)
+        start_time = datetime.datetime.now()
 
-        Examples:
-        | Wait For Animation Starts | zone=zone_coordinates | timeout=15 | threshold=0.99 | step=0.1
-        
-        """
+        #In a loop compares the screenshot with previously taken from screen.
+        #If images are NOT identical returns True, else continue until timeout occurs - throws error and returns False.
+        while True:
+            utils.sleep(step)
+            old_screen = new_screen
+            new_screen = ImageProcessor()._get_screen(False, zone)
 
-        return ImageProcessor(self.error_handler, self.output_dir)._wait_for_animation_starts(zone, timeout, threshold, step)
+            result = ImageProcessor().find_image_result(new_screen, old_screen, threshold)
+            if not result.found:
+                return True
+            if (datetime.datetime.now() - start_time).seconds > timeout:
+                break
 
+        ErrorHandler().report_warning("Timeout exceeded while waiting for animation starts")
+        return False
 
-    @utils.add_error_info
-    def is_zone_animating(self, zone=None, threshold=0.9, step=0.1):
-        """Checks if the given zone is animating. Returns bool.
-        Pass _zone_, _threshold_, _step_ as arguments. All are optional. If zone is not provided
-            the whole active area is taken.
-        Default values are given in the example.
+    def is_animating(self, zone=None, threshold=0.99, step=0.5):
+        # convert passed args to float values
+        threshold = float(threshold)
+        step = float(step)
 
-        Examples:
-        | ${is_animating} = | Is Zone Animating | zone=game_zone | threshold=0.9 | step=0.1
-        
-        """
+        #gets the first screenshot than waits for 'step' time and gets the second screenshot
+        old_screen = ImageProcessor()._get_screen(False, zone)
+        utils.sleep(step)
+        new_screen = ImageProcessor()._get_screen(False, zone)
 
-        return ImageProcessor(self.error_handler, self.output_dir)._is_animating(zone, threshold, step)
+        #compares the first and the second screenshots, returns result. If screenshots are identical - True.
+        return not ImageProcessor().find_image_result(new_screen, old_screen, threshold).found

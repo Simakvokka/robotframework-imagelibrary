@@ -1,12 +1,10 @@
-from __future__ import absolute_import
 import time
-import re
+from robot.api import logger as LOGGER
 
 delta = 20
 
-
 def remove_noise(data):
-    #Remove noise from set
+    """Remove noise from set"""
     if not data:
         return data
 
@@ -14,7 +12,7 @@ def remove_noise(data):
     l.sort()
     base = l[0]
     for i in range(1, len(l)):
-        if (l[i] - base < delta):
+        if l[i] - base < delta:
             data.remove(l[i])
         else:
             base = l[i]
@@ -23,13 +21,13 @@ def remove_noise(data):
 
 def to_bool(b):
     """_to_bool(b) -> bool
-      Converts string, containing 'True' or 'False' to corresponding bool
-      If b is bool return itself"""
-    
-    if (isinstance(b, bool)):
+        Converts string, containing 'True' or 'False' to corresponding bool
+        If b is bool return itself
+    """
+    if isinstance(b, bool):
         return b
 
-    if (isinstance(b, basestring)):
+    if isinstance(b, (str, bytes)):
         if b == 'True':
             return True
         elif b == 'False':
@@ -44,15 +42,15 @@ import warnings
 import functools
 
 def deprecated(func):
-    # This is a decorator which can be used to mark functions
-    # as deprecated. It will result in a warning being emmitted
-    # when the function is used.
-    #
-    # It was taken from http://stackoverflow.com/a/30253848
+    """This is a decorator which can be used to mark functions
+    as deprecated. It will result in a warning being emmitted
+    when the function is used.
+
+    It was taken from http://stackoverflow.com/a/30253848"""
 
     @functools.wraps(func)
     def new_func(*args, **kwargs):
-        warnings.simplefilter('always', DeprecationWarning) #turn off filter
+        warnings.simplefilter('always', DeprecationWarning) #turn off filter 
         warnings.warn("Call to deprecated function {}.".format(func.__name__), category=DeprecationWarning, stacklevel=2)
         warnings.simplefilter('default', DeprecationWarning) #reset filter
         return func(*args, **kwargs)
@@ -68,15 +66,7 @@ def debug_only(func):
 
     return wrapped
 
-def add_error_info(func):
-    def wrapped(self, *args, **kwargs):
-        try:
-            return func(self, *args, **kwargs)
-        except Exception and AttributeError as e:
-            raise RuntimeError(str(e) + "; {}.{} {}".format(self.__class__.__name__, func.__name__, self.name))
-
-    return wrapped
-
+import re
 
 RE_ELEMENT = re.compile(r"^(?P<name>.+?)(\[(?P<index>\d+)\])?$")
 def split_to_name_and_index(name, index):
@@ -95,7 +85,7 @@ def get_element_by_name_and_index(elements, name, index=-1):
     index = sp_index if sp_index is not None else index
     index = int(index)
 
-    assert name in elements, "Element {} not found, possible: {}".format(name, ", ".join(elements.iterkeys()))
+    assert name in elements, "Element {} not found, possible: {}".format(name, ", ".join(sorted(elements.keys())))
     result = elements[name]
     if isinstance(result, list):
         assert index != -1, "{} must be reached by index, but it wasn't set!".format(name)
@@ -104,3 +94,15 @@ def get_element_by_name_and_index(elements, name, index=-1):
         result = result[index-1]
 
     return result
+
+def add_error_info(func):
+    def wrapped(self, *args, **kwargs):
+        try:
+            return func(self, *args, **kwargs)
+        except Exception as e:
+            raise RuntimeError(LOGGER.info(str(e) + ";\n\
+                    <table width='600' border='1'><tr><td><b>class</b></td><td><b>function</b></td><td><b>argument</b></td></tr>"
+                    "<tr><td>{}</td><td>{}</td><td>{}</td></tr></table>".format(self.__class__.__name__, func.__name__, self.name), html=True))
+
+    return wrapped
+

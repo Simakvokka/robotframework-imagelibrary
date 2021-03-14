@@ -1,0 +1,69 @@
+<!-- #######  YAY, I AM THE SOURCE EDITOR! #########-->
+<h1><strong>Buttons guide</strong></h1>
+<p>&nbsp;</p>
+<p><span style="color: #0000ff;">Buttons</span> are entities in <span style="color: #0000ff;">Image</span> <span style="color: #0000ff;">Library</span> to operate with testing objects which are buttons actually. Buttons are clickable and inherit different configurations to help testers to manage with them in various situations. As Image Library is aimed to fully work with <span style="color: #0000ff;">GUI</span> through screenshots thus buttons also are being interacted through pre-defined image templates and in some cases through coordinates.</p>
+<p>If there is a need to interact with buttons through <span style="color: #0000ff;">keyboard</span> - this Image Library buttons are <span style="color: #ff0000;">NOT</span> for these scenarios. Please use another libraries and solutions.&nbsp;</p>
+<p>&nbsp;</p>
+<p><span style="text-decoration: underline;">Image Library operates with Buttons of following types:</span></p>
+<ul>
+<li><strong>button</strong> - use it when you have the constant button state on the screen.&nbsp;</li>
+<li><strong>dynamic_button</strong> - use it when button is not present on the screen all the time and we assume this as okay behaviour. Such button can be defined in a window and library will keep in mind its dynamic presence</li>
+<li><strong>multiple_buttons</strong> - when there are more than 1 button all look the same. And it is hard to distinguish them through image templates. When such button and its amount is defined library counts the number of this buttons appearances on screen and then has an ability to interact with them.</li>
+<li><strong>buttons_panels</strong> - when there are several same buttons (the same image for all) on one line - vertical or horizontal - and they are need to be pressed. Then buttons panels are defined - library will automatically divide the given area (forming this panel) into separate regions of same size and thus buttons can be accessible through index.</li>
+<li><strong>button_coord</strong> - when it is difficult to define button from one of other buttons types and there is only one way to reach it through coordinates. This button will be clicked into region specified while its definition in config.</li>
+<li><strong>global_buttons&nbsp;</strong>- allows to define buttons outside the windows sections in config and reuse them then in the specified states in all windows. Global buttons need to be defined as <strong>global_buttons_defs</strong> section and then used in windows as <strong>global_buttons</strong>. See examples for more details below</li>
+</ul>
+<p>&nbsp;</p>
+<p>Buttons are defined in <em>yaml </em>config file in windows sections except for global buttons definitions.</p>
+<p>Below is the yaml example with explanations.&nbsp;</p>
+<p>===============</p>
+<p>Define all global buttons in all of three possible states and then choose which states to use</p>
+<pre><strong>global_buttons_defs:<br /></strong><em>button name; through this name button is called in keyword</em>
+....  cursor:<br /><em>button can be in 3 states: normal, highlighted, disabled.<br /></em><em>also here the threshold value for button can be defined (default is 0.99). There is no need to specify default threshold.</em>
+....  .... states:
+....  ....  .... highlighted:
+....  ....  .... .... image: cursor_active.png
+....  ....  .... .... threshold: 0.85
+....  ....  .... normal: cursor.png
+....  exit:
+....  .... states:
+....  ....  .... highlighted: exit_active.png
+....  ....  .... normal: exit.png
+....  switch:
+....  ....  states:
+....  ....  .... disabled: switch_disabled.png
+....  show:
+....  ....  states:
+....  ....  .... active: show_active.png
+....  ....  .... disabled: show_disabled.png
+....  send:
+....  ....  states:
+....  ....  .... normal: send.png
+....  ....  .... highlighted: send_active.png
+....  ....  .... disabled: send_disabled.png<br /><br /><em>main window is obligatory to define (if not specified by default main is used)</em></pre>
+<pre><strong>main</strong>:
+.... <strong>buttons</strong>:
+.... .... enter: enter.png
+.... <strong>dynamic_buttons</strong>:
+....  .... cancel: cancel.png
+.... <strong>multiple_buttons</strong>:
+....  .... arrow:
+....  ....  .... expected_count: 5
+....  ....  .... directions: vertical | horizontal
+....  ....  .... image: arrow.png
+....  <strong>button_coord</strong>:
+....  ....  window_button:
+....  ....  .... position: [1108, 345, 23, 21]
+....  <strong>buttons_panels</strong>:
+....  .... cards:
+....  .... .... position:   [349, 115, 441, 160]
+....  .... .... count:      4
+....  .... .... padding:    7 <em>(distance between buttons in pixels)</em>
+....  .... .... direction:  horizontal | vertical | matrix <em>(buttons placement on the panel)</em>
+
+....  <strong>global_buttons</strong>:<br /><em>here specify in which states the button is used in this window; note: all the states you pass will be treated as possbile</em><br /><em>states for button and library will search this button in any of this state when called</em>
+....  ....  cursor: all
+....  ....  exit: highlighted
+....  ....  switch: disabled
+....  ....  show: active
+....  ....  send: [normal, highlighted]<br /><br />To define the threshold (default is 0.99) for button image here use as this:<br /><strong>note: available for:</strong> button, dynamic_buttons, multiple buttons<br /><br /><strong>main</strong>: <br />.... <strong>buttons</strong>: <br />.... .... enter: <br />.... .... .... image: enter.png<br />.... .... .... threshold: 0.85<br />.... <strong>multiple_buttons:</strong><br />.... .... arrow: <br />.... .... .... expected_count: 5 <br />.... .... .... directions: vertical | horizontal <br />.... .... .... image: arrow.png<br />.... .... .... threshold: 0.87<br /><br /></pre>

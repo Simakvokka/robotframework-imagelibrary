@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import ctypes
 import ctypes.wintypes
 from pyautogui._pyautogui_win import POINT
@@ -20,7 +18,6 @@ def get_window_pid(hwnd):
 
 def get_active_window():
     return ctypes.windll.user32.GetForegroundWindow()
-
 
 def get_window_client_rect(hwnd):
     rc = RECT()

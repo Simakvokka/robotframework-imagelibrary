@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pyautogui._pyautogui_x11 import _display, X
 
 
@@ -19,6 +17,9 @@ def _frame(wnd):
 
 def get_active_window():
     return _display.get_input_focus().focus
+
+def get_window():
+    return _display.get_input_focus()
 
 
 def get_window_client_rect(wnd):
