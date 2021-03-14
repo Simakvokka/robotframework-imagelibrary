@@ -19,7 +19,7 @@ pip install robotframework-imagelibrary
 [Keyword documentation](https://simakvokka.github.io/robotframework-imagelibrary/ImageLibrary_0.2.0.html)
 
 **Buttons guide **
-[Buttons documentation] (https://simakvokka.github.io/robotframework-imagelibrary/ButtonsGuide.html)
+[Buttons documentation](https://simakvokka.github.io/robotframework-imagelibrary/ButtonsGuide.html)
 
 
 *Installation Requirements*
@@ -55,7 +55,9 @@ _Example_
 `Library ImageLibrary     screenshot_folder=${CURDIR}${/}output`
 
 
-Create the *yaml* config file (read from [Keyword documentation](https://simakvokka.github.io/robotframework-imagelibrary/ImageLibrary.html)) and specify *windows* and its contents: zones, templates, buttons and window existence criteria.
+Create the *yaml* config file (read from [Keyword documentation](https://simakvokka.github.io/robotframework-imagelibrary/ImageLibrary.html)) and specify *windows* and its
+
+contents: zones, templates, buttons and window existence criteria.
 
 Call in Keywords window contents by its name.
 
@@ -71,7 +73,10 @@ _Example_
 	Coordinates are taken in such format  [x, y, w, h]:  [123, 34, 12, 10]
 	 
 	 | x - from the top left corner of the desired window
+	 
 	 | y - top position from the desired window
+	 
 	 | w - width
+	 
 	 | h - height
 
