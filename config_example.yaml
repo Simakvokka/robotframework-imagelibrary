@@ -1,0 +1,103 @@
+#GLOBAL BUTTONS definitions
+global_buttons_defs:
+    #button name
+    cursor:
+        #define possible states for this button: normal, highlighted, disabled
+        states:
+            normal: normal.png
+            highlighted: highlighted.png
+            disabled: disabled.png
+
+#WINDOWS definitions
+#name of window. 'main' is default and MUST be defined. Other windows names are free to choose.
+main:
+    #zones stored in coordinates
+    zones:
+        #zone name: its value. Coordinates are stored in a list.
+        number: [23, 15, 295, 60]
+        text: [x, y, w, h]
+
+    #BUTTONS definitions
+
+    #global buttons
+    global_buttons:
+        #global button name from global_buttons_defs section. And put the desired value for this window: normal, highlighted, disabled or all to use all states
+        cursor: all
+
+    #just buttons
+    buttons:
+        #button name and value is the name of png file
+        window_button: window_button.png
+        #adjust threshold value here as follows
+        button:
+          image: button.png
+          threshold: 0.85
+
+    #dynamic buttons. Can appear randomly in defined window area
+    dynamic_buttons:
+        #button name and value is the name of png file
+        window_button: window_button.png
+        #adjust threshold value here as follows
+        button:
+          image: button.png
+          threshold: 0.85
+
+    #multiple buttons are the same button which appears several times at the same moment on the screen.
+    multiple_buttons:
+        #button name
+        button:
+            expected_count: 5  #how many buttons are expected on screen
+            direction: vertical #what the button direction
+            image: arrow.png    #button image.png template
+            threshold: 0.99     #threshold for this button
+
+    #buttons panles are buttons which are difficult to capture via template and they all have the same size.
+    #These buttons are defined through a specific zone, which is then being divided into the right parts (buttons amount is provided in argument)
+    #and accessed by index
+    buttons_panels:
+        #button name
+        button:
+            #position of whole button panel block
+            position:   [348, 114, 443, 163]
+            #count of buttons on the  panel
+            count:      4
+            #optional: distance between buttons by pixels (0 by default)
+            padding:    8
+            #optional: direction (horizontal by default)
+            direction:  horizontal
+
+    #button coordinations. Access button via coordinates: [left, top, width, height]. Note the 'left' coordinate is taken from
+    #the left top corner of your window (your program window, the area where you want to test)
+    button_coord:
+        button: [100, 30, 40, 50]
+
+
+    #TEMPLATES
+    templates:
+        #template name and image
+        okk: occ.png
+        #template and redefined threshold
+        notification:
+            image: notif.png
+            threshold: 0.85
+
+    #complex templates are several images for the same template
+    complex_templates:
+        #template name and images as list.
+        icons:
+            - pen.png
+            - stroke.png
+            - gummi.png
+        #OR define your template like this
+        icons_2: [pen.png, stroke.png, gummi.png]
+
+    #you can define any numerical or string values as lists in your config and access them via special keywords
+    #and indexes
+    values:
+        numbers: [1, 24, 56, 77]
+
+    #this option is for checking the window existence. It MUST be defined. Put the markers for your window
+    #presence. It can be a single image or a list of images.
+    exist:
+        if: [buttons_panel.png, img.png, img2.png]
+

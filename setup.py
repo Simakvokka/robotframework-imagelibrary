@@ -1,4 +1,4 @@
-import re
+import re, os
 from os.path import abspath, dirname, join
 from setuptools import setup, find_packages
 
@@ -12,7 +12,7 @@ with open(join(CURDIR, 'README.md')) as f:
 
 setup(
     name             = 'robotframework-imagelibrary',
-    version          = '1.0.0',
+    version          = '1.0.1',
     description      = 'Image Processing Library For Robot Framework',
     long_description = DESCRIPTION,
     author           = 'Prokhorova Maria',

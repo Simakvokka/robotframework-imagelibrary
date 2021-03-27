@@ -8,7 +8,7 @@ from ImageLibrary.libcore.robotlibcore import DynamicCore
 from ImageLibrary.libcore.robotlibcore import keyword
 
 
-__version__ = '1.0.0'
+__version__ = '1.0.1'
 
 class ImageLibrary(DynamicCore):
     """ImageLibrary library provides methods to work with active windows and screenshots.
