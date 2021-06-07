@@ -12,7 +12,7 @@ with open(join(CURDIR, 'README.md')) as f:
 
 setup(
     name             = 'robotframework-imagelibrary',
-    version          = '0.1.1',
+    version          = '1.0.1',
     description      = 'Image Processing Library For Robot Framework',
     long_description = DESCRIPTION,
     author           = 'Prokhorova Maria',
@@ -22,8 +22,8 @@ setup(
     license          = 'Apache License 2.0',
     keywords         = 'robotframework testing testautomation image processing',
     platforms        = 'Windows',
-    python_requires  = '>=2.7.*, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4',
-    install_requires = ['robotframework', 'opencv-python', 'pyautogui', 'numpy', 'pytesseract', 'scikit-image', 'pillow', 'future'],
+    python_requires  = '>3.5.*',
+    install_requires = ['robotframework', 'opencv-python', 'pyautogui', 'numpy', 'pytesseract', 'scikit-image', 'pillow', 'future', 'pyyaml'],
     package_dir      = {'': 'src'},
     packages         = find_packages('src')
 )

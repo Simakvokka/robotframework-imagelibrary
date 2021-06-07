@@ -434,7 +434,6 @@ class ImageProcessor(metaclass=Singleton):
         
         orig = self._get_screen(cache, zone)
         origFile = self._make_up_filename()
-        orig.save(origFile)
     
         if resize_percent != 0:
             resized = self.resize_image(resize_percent, origFile)

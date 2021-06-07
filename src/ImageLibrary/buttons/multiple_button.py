@@ -59,7 +59,7 @@ class MultipleButton(Button):
             self.find_on_screen()
         index = int(index)
         assert index <= len(self.buttons), "Index is out of borders"
-        self.click_center(self.buttons[index-1], times)
+        self.click_center(self.buttons[index], times)
 
     @utils.add_error_info
     def get_buttons_count(self, index):

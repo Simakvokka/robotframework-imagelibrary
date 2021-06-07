@@ -77,12 +77,11 @@ class GUIProcess(Process.Process):
         except RobotNotRunningError:
             LOGGER.info('Could not get output dir, using default - output')
             output = os.path.join(os.getcwd(), 'output')
-
         output = os.path.abspath(output)
         if not os.path.exists(output):
             os.mkdir(output)
-        self._screenshot_counter += 1
-
+            self._screenshot_counter += 1
+    
         return os.path.join(output,
                     "guiproc-screenshot-{}.png".format(self._screenshot_counter))
 

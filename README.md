@@ -43,6 +43,8 @@ If all the data is correct library memorizes it and creates keyword objects (tem
 
 All the objects are destroyed when test execution is complete.
 
+Refer to the *config_example.yaml* and *init_example.robot* in the project root to get more documentation inside on how to correctly setup your tests with Image Library.
+
 
 *Usage*
 

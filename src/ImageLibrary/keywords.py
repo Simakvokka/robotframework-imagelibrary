@@ -173,7 +173,7 @@ class Keywords(LibraryComponent, Animations, GUIProcess):
                     self.windows[name].append(Window(screen, name, self.button_constructor, self.debug))
 
 
-    def _get_window(self, window, index=-1):
+    def _get_window(self, window=None, index=-1):
         if window is not None:
             return utils.get_element_by_name_and_index(self.windows, window, index)
             # todo:check
