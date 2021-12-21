@@ -1,13 +1,13 @@
 import ctypes
 import ctypes.wintypes
-from pyautogui._pyautogui_win import POINT
+from ctypes.wintypes import POINT
 
 
 class RECT (ctypes.Structure):
-    _fields_ = [ ("left", ctypes.wintypes.LONG),
-                 ("top",  ctypes.wintypes.LONG),
-                 ("right", ctypes.wintypes.LONG),
-                 ("bottom", ctypes.wintypes.LONG)]
+    _fields_ = [("left", ctypes.wintypes.LONG),
+                ("top",  ctypes.wintypes.LONG),
+                ("right", ctypes.wintypes.LONG),
+                ("bottom", ctypes.wintypes.LONG)]
 
 
 def get_window_pid(hwnd):
@@ -18,6 +18,7 @@ def get_window_pid(hwnd):
 
 def get_active_window():
     return ctypes.windll.user32.GetForegroundWindow()
+
 
 def get_window_client_rect(hwnd):
     rc = RECT()
@@ -32,6 +33,5 @@ def get_window_client_rect(hwnd):
 
 
 def set_active_window(hwnd):
-    #ctypes.windll.user32.SetFocus(hwnd)
+    # ctypes.windll.user32.SetFocus(hwnd)
     ctypes.windll.user32.SetForegroundWindow(hwnd)
-
