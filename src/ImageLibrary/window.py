@@ -35,21 +35,24 @@ class Window(LibraryComponent):
         #if self.config != 'None':
 
         for entry_type, entry_config in sorted(self.config.items()):
-            if entry_type in BUTTON_TYPES:
-                self.buttons.update(self.button_constructor.create_buttons(entry_type, entry_config))
-            elif entry_type == "templates":
-                for template_name, template_config in sorted(entry_config.items()):
-                    self.templates[template_name] = Template(template_name, template_config)
-            elif entry_type == "complex_templates":
-                for template_name, template_config in sorted(entry_config.items()):
-                    self.complex_templates[template_name] = ComplexTemplate(template_name, template_config)
-            elif entry_type == "zones":
-                for zone_name, zone_config in sorted(entry_config.items()):
-                    self.zones[zone_name] = Zone(zone_name, zone_config)
-            elif entry_type == "values":
-                for value_name, value_config in sorted(entry_config.items()):
-                    self.values[value_name] = Value(value_name, value_config)
-
+            try:
+                if entry_type in BUTTON_TYPES:
+                    self.buttons.update(self.button_constructor.create_buttons(entry_type, entry_config))
+                elif entry_type == "templates":
+                    for template_name, template_config in sorted(entry_config.items()):
+                        self.templates[template_name] = Template(template_name, template_config)
+                elif entry_type == "complex_templates":
+                    for template_name, template_config in sorted(entry_config.items()):
+                        self.complex_templates[template_name] = ComplexTemplate(template_name, template_config)
+                elif entry_type == "zones":
+                    for zone_name, zone_config in sorted(entry_config.items()):
+                        self.zones[zone_name] = Zone(zone_name, zone_config)
+                elif entry_type == "values":
+                    for value_name, value_config in sorted(entry_config.items()):
+                        self.values[value_name] = Value(value_name, value_config)
+            except AttributeError:
+                raise AttributeError(f"Check your yaml config file for section: {entry_type} and its value: {entry_config}.")
+            
     @utils.add_error_info
     def _init_static_elements(self, screen=None):
         """Init position of static elements of window. Assumes that window is on screen or error will be raised
@@ -171,10 +174,14 @@ class Window(LibraryComponent):
 
     @utils.add_error_info
     def wait_for_show(self, timeout=15):
+        if isinstance(timeout, str):
+            ErrorHandler().report_error("Window names should be passed with explicit argument window for keywords `Wait For Show` and `Wait For Hide`, except the case when 'main' window is used")
         return self._wait_for_window_state(True, timeout)
 
     @utils.add_error_info
     def wait_for_hide(self, timeout=15):
+        if isinstance(timeout, str):
+            ErrorHandler().report_error("Window names should be passed with explicit argument window, except the case when 'main' window is used")
         return self._wait_for_window_state(False, timeout)
 
     @utils.add_error_info

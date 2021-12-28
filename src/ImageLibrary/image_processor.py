@@ -454,8 +454,5 @@ class ImageProcessor(metaclass=Singleton):
         if not os.path.exists(output):
             os.mkdir(output)
         self._screenshot_counter += 1
-    
         return os.path.join(output,
-                            "guiproc-screenshot-%d.png" % (self._screenshot_counter))
-
-        
+                            f"guiproc-screenshot-{self._screenshot_counter}")
