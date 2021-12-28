@@ -1,15 +1,12 @@
 import ctypes
 import ctypes.wintypes
-from pyautogui import Point
-
+from ctypes.wintypes import POINT
 
 class RECT (ctypes.Structure):
-    _fields_ = [
-        ("left", ctypes.wintypes.LONG),
-        ("top",  ctypes.wintypes.LONG),
-        ("right", ctypes.wintypes.LONG),
-        ("bottom", ctypes.wintypes.LONG)
-    ]
+    _fields_ = [("left", ctypes.wintypes.LONG),
+                ("top",  ctypes.wintypes.LONG),
+                ("right", ctypes.wintypes.LONG),
+                ("bottom", ctypes.wintypes.LONG)]
 
 
 def get_window_pid(hwnd):
