@@ -58,7 +58,7 @@ class ErrorHandler(metaclass=Singleton):
     def clear_history(self):
         self.history = deque(maxlen=ErrorHandler.HISTORY_SIZE)
 
-    def _dump_screenshots(self):
+    def dump_screenshots(self):
         LOGGER.info("Dumping screenshots to disk")
         for screen in self.history:
             self._save_to_disk(screen[0], screen[1])
